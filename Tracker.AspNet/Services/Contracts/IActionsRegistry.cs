@@ -4,5 +4,5 @@ namespace Tracker.AspNet.Services.Contracts;
 
 public interface IActionsRegistry
 {
-    ActionDescriptor GetActionDescriptor(string route);
+    ActionDescriptor? GetActionDescriptor(string route);
 }

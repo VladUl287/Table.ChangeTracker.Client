@@ -16,8 +16,8 @@ public class DefaultActionsRegistry : IActionsRegistry
         _store = store.ToFrozenDictionary();
     }
 
-    public ActionDescriptor GetActionDescriptor(string route)
+    public virtual ActionDescriptor? GetActionDescriptor(string route)
     {
-        return _store.GetValueOrDefault(route, null);
+        return _store.TryGetValue(route, out var value) ? value : null;
     }
 }

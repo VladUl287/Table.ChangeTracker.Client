@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
-using Tracker.AspNet.Middlewares;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Middlewares;
@@ -18,10 +17,10 @@ public sealed class TrackMiddleware<TContext>(
         {
             var path = pathResolver.ResolvePath(context);
             var descriptor = actionsRegistry.GetActionDescriptor(path);
-            var token = context.RequestAborted;
 
             if (descriptor is not null)
             {
+                var token = context.RequestAborted;
                 if (await etagService.TrySetETagAsync(context, descriptor, token))
                     return;
             }
