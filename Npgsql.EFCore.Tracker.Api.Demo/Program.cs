@@ -12,20 +12,20 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddOpenApi();
 
-    builder.Services.AddDbContext<DatabaseContext>(options =>
-    {
-        options
-            .UseNpgsql("Host=localhost;Port=5432;Database=main;Username=postgres;Password=postgres")
-            .EnableSensitiveDataLogging()
-            .EnableDetailedErrors();
+    builder.Services
+        .AddTracker<DatabaseContext>(Assembly.GetExecutingAssembly())
+        .AddDbContext<DatabaseContext>(options =>
+        {
+            options
+                .UseNpgsql("Host=localhost;Port=5432;Database=main;Username=postgres;Password=postgres")
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors();
 
-        options
-            .ReplaceService<IMigrationsModelDiffer, TrackingMigrationsModelDiffer>()
-            .ReplaceService<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>()
-            ;
-    });
-
-    builder.Services.AddTrackerSupport(Assembly.GetExecutingAssembly());
+            options
+                .ReplaceService<IMigrationsModelDiffer, TrackingMigrationsModelDiffer>()
+                .ReplaceService<IMigrationsSqlGenerator, CustomNpgsqlMigrationsSqlGenerator>()
+                ;
+        });
 }
 
 var app = builder.Build();

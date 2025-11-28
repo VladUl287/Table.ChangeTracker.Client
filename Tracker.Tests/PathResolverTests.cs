@@ -18,7 +18,7 @@ public class PathResolverTests
         request.Path = "/v1/users";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/api/v1/users", result);
@@ -34,7 +34,7 @@ public class PathResolverTests
         request.Path = PathString.Empty;
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/api", result);
@@ -50,7 +50,7 @@ public class PathResolverTests
         request.Path = "/users";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/users", result);
@@ -66,7 +66,7 @@ public class PathResolverTests
         request.Path = PathString.Empty;
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/", result);
@@ -82,7 +82,7 @@ public class PathResolverTests
         request.Path = "/";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/api/", result);
@@ -98,7 +98,7 @@ public class PathResolverTests
         request.Path = "/users";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/users", result);
@@ -114,7 +114,7 @@ public class PathResolverTests
         request.Path = "/";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/", result);
@@ -130,7 +130,7 @@ public class PathResolverTests
         request.Path = "/products/123/details";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/api/v2/products/123/details", result);
@@ -146,7 +146,7 @@ public class PathResolverTests
         request.Path = "/users";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/api/users", result);
@@ -162,7 +162,7 @@ public class PathResolverTests
         request.Path = "/";
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/", result);
@@ -178,7 +178,7 @@ public class PathResolverTests
         request.Path = PathString.Empty;
 
         // Act
-        var result = _defaultPathResolver.Resolve(context);
+        var result = _defaultPathResolver.ResolvePath(context);
 
         // Assert
         Assert.Equal("/", result);

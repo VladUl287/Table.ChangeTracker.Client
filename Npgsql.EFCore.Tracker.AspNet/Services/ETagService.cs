@@ -1,0 +1,57 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Npgsql.EFCore.Tracker.AspNet.Logging;
+using Npgsql.EFCore.Tracker.AspNet.Models;
+using Npgsql.EFCore.Tracker.AspNet.Services.Contracts;
+using Npgsql.EFCore.Tracker.Core.Extensions;
+
+namespace Npgsql.EFCore.Tracker.AspNet.Services;
+
+public class ETagService<TContext>(
+    IETagGenerator etagGenerator, ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
+{
+    public async ValueTask<bool> ValidateAndSetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default)
+    {
+        if (descriptor is null)
+        {
+            logger.LogDescriptorNotFound();
+            return false;
+        }
+
+        if (context.Response.Headers.ContainsKey("ETag"))
+        {
+            logger.LogETagAlreadyExists();
+            return false;
+        }
+
+        var dbContext = context.RequestServices.GetService<TContext>();
+        if (dbContext is null)
+        {
+            logger.LogDbContextNotFound(typeof(TContext).Name);
+            return false;
+        }
+
+        var lastTimestamp = await dbContext.GetLastTimestamp(descriptor.Tables, token);
+        if (string.IsNullOrEmpty(lastTimestamp))
+        {
+            logger.LogLastTimestampNotFound();
+            return false;
+        }
+
+        var dateTime = DateTimeOffset.Parse(lastTimestamp);
+        var etag = etagGenerator.GenerateETag(dateTime);
+
+        if (context.Request.Headers["If-None-Match"] == etag)
+        {
+            logger.LogNotModified(etag);
+            context.Response.StatusCode = StatusCodes.Status304NotModified;
+            return true;
+        }
+
+        logger.LogETagAdded(etag);
+        context.Response.Headers["ETag"] = etag;
+        return false;
+    }
+}

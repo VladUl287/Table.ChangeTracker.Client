@@ -6,7 +6,7 @@ namespace Npgsql.EFCore.Tracker.AspNet.Services;
 
 public class DefaultPathResolver : IPathResolver
 {
-    public virtual string Resolve(HttpContext context)
+    public virtual string ResolvePath(HttpContext context)
     {
         return context.Request.GetEncodedPath();
     }

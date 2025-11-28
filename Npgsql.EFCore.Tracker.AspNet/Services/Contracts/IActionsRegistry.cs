@@ -4,5 +4,5 @@ namespace Npgsql.EFCore.Tracker.AspNet.Services.Contracts;
 
 public interface IActionsRegistry
 {
-    ActionDescriptor Get(string route);
+    ActionDescriptor GetActionDescriptor(string route);
 }
