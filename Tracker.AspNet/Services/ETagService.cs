@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
-using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
 using Tracker.Core.Extensions;
 

@@ -2,9 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Tracker.AspNet.Attributes;
 using Tracker.AspNet.Middlewares;
-using Tracker.AspNet.Models;
 using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
 
