@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql.EFCore.Tracker.Api.Demo.Database.Entities;
-using Npgsql.EFCore.Tracker.Core.Extensions;
 
 namespace Npgsql.EFCore.Tracker.Api.Demo.Database;
 
@@ -16,7 +15,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             .Entity<Role>(builder =>
             {
                 builder.HasKey(c => c.Id);
-            })
-            .EnableTracking<Role>();
+            });
     }
 }
