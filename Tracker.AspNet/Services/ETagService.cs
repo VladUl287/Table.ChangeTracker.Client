@@ -12,7 +12,7 @@ namespace Tracker.AspNet.Services;
 public class ETagService<TContext>(
     IETagGenerator etagGenerator, ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
 {
-    public async ValueTask<bool> TrySetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default)
+    public async Task<bool> TrySetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default)
     {
         if (context.Response.Headers.ContainsKey("ETag"))
         {
