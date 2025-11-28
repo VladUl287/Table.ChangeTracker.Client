@@ -5,5 +5,5 @@ namespace Npgsql.EFCore.Tracker.AspNet.Services.Contracts;
 
 public interface IETagService
 {
-    ValueTask<bool> SetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default);
+    ValueTask<bool> TrySetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default);
 }

@@ -19,9 +19,12 @@ public sealed class TrackMiddleware<TContext>(
             var descriptor = actionsRegistry.GetActionDescriptor(path);
             var token = context.RequestAborted;
 
-            if (descriptor is not null && await etagService.SetETagAsync(context, descriptor, token))
-                return;
-            else if (descriptor is null)
+            if (descriptor is not null)
+            {
+                if (await etagService.TrySetETagAsync(context, descriptor, token))
+                    return;
+            }
+            else
                 logger.LogDescriptorNotFound();
         }
 
