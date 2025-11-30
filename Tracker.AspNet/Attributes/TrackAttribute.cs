@@ -9,6 +9,4 @@ public sealed class TrackAttribute(
     public string? Route { get; } = route;
     public string[]? Tables { get; } = tables;
     public Type[]? Entities { get; } = entities;
-
-    internal bool IsGlobal => Tables is null or { Length: 0 } && Entities is null or { Length: 0 };
 }
