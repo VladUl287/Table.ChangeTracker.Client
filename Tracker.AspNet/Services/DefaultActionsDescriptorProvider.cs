@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using Tracker.AspNet.Attributes;
 using Tracker.AspNet.Extensions;
@@ -8,7 +9,8 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public class DefaultActionsDescriptorProvider(EndpointDataSource endpointRouteBuilder) : IActionsDescriptorProvider
+public class DefaultActionsDescriptorProvider(
+    EndpointDataSource endpointRouteBuilder, ILogger<DefaultActionsDescriptorProvider> logger) : IActionsDescriptorProvider
 {
     public virtual IEnumerable<ActionDescriptor> GetActionsDescriptors(params Assembly[] assemblies)
     {
