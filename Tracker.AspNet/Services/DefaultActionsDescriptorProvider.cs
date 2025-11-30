@@ -10,7 +10,7 @@ using Tracker.AspNet.Services.Contracts;
 namespace Tracker.AspNet.Services;
 
 public class DefaultActionsDescriptorProvider<TContext>(
-    EndpointDataSource endpDataSrc, ILogger<DefaultActionsDescriptorProvider<TContext>> logger) : IActionsDescriptorProvider
+    EndpointDataSource endpDataSrc, TContext context, ILogger<DefaultActionsDescriptorProvider<TContext>> logger) : IActionsDescriptorProvider
     where TContext : DbContext
 {
     public virtual IEnumerable<ActionDescriptor> GetActionsDescriptors(params Assembly[] assemblies)
@@ -29,11 +29,37 @@ public class DefaultActionsDescriptorProvider<TContext>(
             {
                 var route = routeEndpoint.RoutePattern.RawText ?? controllerTracking.Route ??
                     throw new NullReferenceException($"Route for '{routeEndpoint.DisplayName}' not found.");
-                
+
+                var tables = new HashSet<string>();
+                foreach (var table in controllerTracking.Tables ?? [])
+                {
+                    var added = tables.Add(table);
+                    if (!added)
+                    {
+                        //log warning
+                    }
+                }
+
+                var contextModel = context.Model;
+                foreach (var entity in controllerTracking.Entities ?? [])
+                {
+                    var entityType = contextModel.FindEntityType(entity) ??
+                        throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
+
+                    var tableName = entityType.GetSchemaQualifiedTableName() ??
+                        throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
+
+                    var added = tables.Add(tableName);
+                    if (!added)
+                    {
+                        //log warning
+                    }
+                }
+
                 yield return new ActionDescriptor
                 {
                     Route = route,
-                    Tables = controllerTracking.Tables ?? []
+                    Tables = tables.ToArray()
                 };
             }
 
