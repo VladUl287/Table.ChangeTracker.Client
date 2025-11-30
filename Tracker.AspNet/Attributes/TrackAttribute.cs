@@ -4,13 +4,11 @@
 public sealed class TrackAttribute(
       string? route = null,
       string[]? tables = null,
-      Type[]? entities = null,
-      long cacheLifeTime = default) : Attribute
+      Type[]? entities = null) : Attribute
 {
     public string? Route { get; } = route;
     public string[]? Tables { get; } = tables;
     public Type[]? Entities { get; } = entities;
-    public long CacheLifeTime { get; } = cacheLifeTime;
 
     internal bool IsGlobal => Tables is null or { Length: 0 } && Entities is null or { Length: 0 };
 }

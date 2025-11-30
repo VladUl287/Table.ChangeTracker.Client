@@ -5,10 +5,9 @@ namespace Tracker.AspNet.Extensions;
 public static class MinimalApiExtensions
 {
     public static IEndpointConventionBuilder WithTracking(
-        this IEndpointConventionBuilder endpoint, string? route = null, string[]? tables = null,
-        Type[]? entities = null, TimeSpan? cacheLifeTime = default)
+        this IEndpointConventionBuilder endpoint, string? route = null, string[]? tables = null, Type[]? entities = null)
     {
-        endpoint.WithMetadata(new TrackRouteMetadata(route, tables, entities, cacheLifeTime));
+        endpoint.WithMetadata(new TrackRouteMetadata(route, tables, entities));
         return endpoint;
     }
 
@@ -19,5 +18,4 @@ public static class MinimalApiExtensions
     }
 }
 
-public sealed record TrackRouteMetadata(
-    string? Route = null, string[]? Tables = null, Type[]? Entities = null, TimeSpan? CacheLifeTime = default);
+public sealed record TrackRouteMetadata(string? Route = null, string[]? Tables = null, Type[]? Entities = null);
