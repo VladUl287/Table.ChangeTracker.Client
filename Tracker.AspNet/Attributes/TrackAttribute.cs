@@ -11,24 +11,26 @@ namespace Tracker.AspNet.Attributes;
 public sealed class TrackAttribute : Attribute, IAsyncActionFilter
 {
     public TrackAttribute()
-    {
-
-    }
+    { }
 
     public TrackAttribute(string[] tables)
     {
         ArgumentNullException.ThrowIfNull(tables, nameof(tables));
+        Tables = tables;
     }
 
     public TrackAttribute(Type[] entities)
     {
         ArgumentNullException.ThrowIfNull(entities, nameof(entities));
+        Entities = entities;
     }
 
     public TrackAttribute(string[] tables, Type[] entities)
     {
         ArgumentNullException.ThrowIfNull(tables, nameof(tables));
         ArgumentNullException.ThrowIfNull(entities, nameof(entities));
+        Tables = tables;
+        Entities = entities;
     }
 
     public string[] Tables { get; } = [];
@@ -41,20 +43,31 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
             var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
             var token = context.HttpContext.RequestAborted;
 
-            if (await etagService.TrySetETagAsync(context.HttpContext, Tables, token))
+            if (IsGlobalRequest())
             {
-                context.Result = new StatusCodeResult(StatusCodes.Status304NotModified);
-                return;
+                if (await etagService.TrySetETagAsync(context.HttpContext, token))
+                {
+                    context.Result = new StatusCodeResult(StatusCodes.Status304NotModified);
+                    return;
+                }
+            }
+            else
+            {
+                if (await etagService.TrySetETagAsync(context.HttpContext, Tables, token))
+                {
+                    context.Result = new StatusCodeResult(StatusCodes.Status304NotModified);
+                    return;
+                }
             }
         }
 
         await next();
     }
 
-    public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-    {
-        return Task.CompletedTask;
-    }
+    public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next) => Task.CompletedTask;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsGlobalRequest() => Tables is null or { Length: 0 } && Entities is null or { Length: 0 };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsGetMethod(HttpContext context) => context.Request.Method == HttpMethod.Get.Method;

@@ -48,4 +48,9 @@ public class ETagService<TContext>(
         context.Response.Headers["ETag"] = etag;
         return false;
     }
+
+    public Task<bool> TrySetETagAsync(HttpContext context, CancellationToken token = default)
+    {
+        throw new NotImplementedException();
+    }
 }
