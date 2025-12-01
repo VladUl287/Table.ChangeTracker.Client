@@ -36,10 +36,16 @@ var app = builder.Build();
     });
 
     app.MapGet("/api/role", () => "Get all roles")
-        .WithTracking(tables: ["roles"]);
+        .WithTracking<DatabaseContext>((opt) =>
+        {
+            opt.Tables = ["roles"];
+        });
 
     app.MapGet("/api/role/table", () => "Get all roles with table")
-        .WithTracking<DatabaseContext>(entities: [typeof(Role)]);
+        .WithTracking<DatabaseContext>((opt) =>
+        {
+            opt.Entities = [typeof(Role)];
+        });
 
     app.MapControllers();
 }

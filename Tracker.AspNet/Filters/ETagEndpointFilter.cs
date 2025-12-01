@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Tracker.AspNet.Extensions;
+using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Filters;
 
 public sealed class ETagEndpointFilter() : IEndpointFilter
 {
-    public ETagEndpointFilter(string[] tables) : this()
+    public ETagEndpointFilter(GlobalOptions options) : this()
     {
-        Tables = tables;
+        Options = options;
     }
-
-    public string[] Tables { get; } = [];
+    
+    public GlobalOptions? Options { get; }
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -22,7 +23,8 @@ public sealed class ETagEndpointFilter() : IEndpointFilter
         var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
         var token = context.HttpContext.RequestAborted;
 
-        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
+        var tables = Options?.Tables ?? [];
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, tables, token);
         if (shouldReturnNotModified)
             return Results.StatusCode(StatusCodes.Status304NotModified);
 
