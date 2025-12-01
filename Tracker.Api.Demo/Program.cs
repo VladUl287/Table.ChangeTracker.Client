@@ -2,9 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Tracker.Api.Demo.Database;
 using Tracker.Api.Demo.Database.Entities;
-using Tracker.Api.Demo.Extensions;
 using Tracker.AspNet.Extensions;
-using Tracker.AspNet.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -31,6 +29,10 @@ var app = builder.Build();
     }
 
     app.UseAuthorization();
+
+    //app.UseTracker<DatabaseContext>();
+    //app.UseTracker<DatabaseContext>(["roles"]);
+    //app.UseTracker<DatabaseContext>([typeof(Role)]);
 
     app.MapGet("/api/role", () => "Get all roles")
         .WithTracking(tables: ["roles"]);

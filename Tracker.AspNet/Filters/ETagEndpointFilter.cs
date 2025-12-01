@@ -22,9 +22,9 @@ public sealed class ETagEndpointFilter() : IEndpointFilter
         var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
         var token = context.HttpContext.RequestAborted;
 
-        //var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
-        //if (shouldReturnNotModified)
-        //    return Results.StatusCode(StatusCodes.Status304NotModified);
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
+        if (shouldReturnNotModified)
+            return Results.StatusCode(StatusCodes.Status304NotModified);
 
         return await next(context);
     }

@@ -13,6 +13,9 @@ public class ETagService<TContext>(
 {
     public async Task<bool> TrySetETagAsync(HttpContext context, string[] tables, CancellationToken token = default)
     {
+        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(tables, nameof(tables));
+
         if (context.Response.Headers.ETag.Count != 0)
         {
             logger.LogETagAlreadyExists();
@@ -24,20 +27,6 @@ public class ETagService<TContext>(
         {
             logger.LogDbContextNotFound(typeof(TContext).Name);
             return false;
-        }
-
-        var timestamps = new List<DateTimeOffset>(tables.Length);
-        foreach (var table in tables)
-        {
-            var lastTimestamp = await dbContext.GetLastTimestamp(table, token);
-
-            if (string.IsNullOrEmpty(lastTimestamp))
-            {
-                logger.LogLastTimestampNotFound();
-                return false;
-            }
-
-            timestamps.Add(DateTimeOffset.Parse(lastTimestamp));
         }
 
         var etag = await GenerateETag(tables, dbContext, token);
