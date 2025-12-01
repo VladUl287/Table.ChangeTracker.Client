@@ -5,7 +5,7 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Middlewares;
 
-public sealed class TrackerMiddleware(RequestDelegate next, IETagService eTagService, MiddlewareOptions opts)
+public sealed class TrackerMiddleware(RequestDelegate next, IETagService eTagService, GlobalOptions opts)
 {
     public async Task InvokeAsync(HttpContext context)
     {

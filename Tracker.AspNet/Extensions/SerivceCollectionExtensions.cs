@@ -23,21 +23,21 @@ public static class SerivceCollectionExtensions
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder)
         where TContext : DbContext
     {
-        var options = new MiddlewareOptions();
+        var options = new GlobalOptions();
         return builder.UseTracker<TContext>(options);
     }
 
-    public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, Action<MiddlewareOptions> configure)
+    public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, Action<GlobalOptions> configure)
         where TContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(configure, nameof(configure));
 
-        var options = new MiddlewareOptions();
+        var options = new GlobalOptions();
         configure(options);
         return builder.UseTracker<TContext>(options);
     }
 
-    public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, MiddlewareOptions options)
+    public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, GlobalOptions options)
         where TContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(options, nameof(options));
