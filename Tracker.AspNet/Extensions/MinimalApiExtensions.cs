@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tracker.AspNet.Filters;
@@ -15,33 +16,45 @@ public static class MinimalApiExtensions
 
     public static IEndpointConventionBuilder WithTracking(this IEndpointConventionBuilder endpoint, string[] tables)
     {
-        return endpoint.AddEndpointFilterFactory((serviceProvider, next) =>
+        return endpoint.AddEndpointFilterFactory((provider, next) =>
         {
-            var logger = serviceProvider.ApplicationServices.GetRequiredService<ILogger<ETagEndpointFilter>>();
+            var logger = provider.ApplicationServices.GetRequiredService<ILogger<ETagEndpointFilter>>();
             var filter = new ETagEndpointFilter(tables);
             return (context) => filter.InvokeAsync(context, next);
         });
     }
 
-    public static IEndpointConventionBuilder WithTracking(this IEndpointConventionBuilder endpoint, Type[] entities)
+    public static IEndpointConventionBuilder WithTracking<TContext>(this IEndpointConventionBuilder endpoint, Type[] entities)
+        where TContext : DbContext
     {
-        return endpoint.AddEndpointFilterFactory((context, next) =>
+        return endpoint.AddEndpointFilterFactory((provider, next) =>
         {
-            return async (invocCtx) =>
-            {
-                return await next(invocCtx);
-            };
+            var dbContext = provider.ApplicationServices.GetRequiredService<TContext>();
+            var tables = ResolveTables(dbContext, entities);
+            var logger = provider.ApplicationServices.GetRequiredService<ILogger<ETagEndpointFilter>>();
+            var filter = new ETagEndpointFilter(tables);
+            return (context) => filter.InvokeAsync(context, next);
         });
     }
 
-    public static IEndpointConventionBuilder WithTracking(this IEndpointConventionBuilder endpoint, string[] tables, Type[] entities)
+    private static string[] ResolveTables<TContext>(TContext context, Type[] entities)
+         where TContext : DbContext
     {
-        return endpoint.AddEndpointFilterFactory((context, next) =>
+        var result = new HashSet<string>();
+
+        var contextModel = context.Model;
+
+        foreach (var entity in entities ?? [])
         {
-            return async (invocCtx) =>
-            {
-                return await next(invocCtx);
-            };
-        });
+            var entityType = contextModel.FindEntityType(entity) ??
+                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
+
+            var tableName = entityType.GetSchemaQualifiedTableName() ??
+                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
+
+            result.Add(tableName);
+        }
+
+        return [.. result];
     }
 }

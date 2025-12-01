@@ -5,14 +5,10 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Filters;
 
-public sealed class ETagEndpointFilter : IEndpointFilter
+public sealed class ETagEndpointFilter() : IEndpointFilter
 {
-    public ETagEndpointFilter()
-    { }
-
-    public ETagEndpointFilter(string[] tables)
+    public ETagEndpointFilter(string[] tables) : this()
     {
-        ArgumentNullException.ThrowIfNull(tables, nameof(tables));
         Tables = tables;
     }
 
