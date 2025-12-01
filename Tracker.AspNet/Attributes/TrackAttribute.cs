@@ -20,6 +20,7 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
     }
 
     public string[] Tables { get; } = [];
+    public bool IsGlobalTrack => Tables is null or { Length: 0 };
 
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
@@ -28,7 +29,7 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
             var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
             var token = context.HttpContext.RequestAborted;
 
-            if (IsGlobalRequest())
+            if (IsGlobalTrack)
             {
                 if (await etagService.TrySetETagAsync(context.HttpContext, token))
                 {
@@ -50,9 +51,6 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
     }
 
     public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next) => Task.CompletedTask;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsGlobalRequest() => Tables is null or { Length: 0 };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsGetMethod(HttpContext context) => context.Request.Method == HttpMethod.Get.Method;
