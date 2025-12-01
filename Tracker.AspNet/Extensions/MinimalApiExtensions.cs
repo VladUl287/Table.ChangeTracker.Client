@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tracker.AspNet.Filters;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Extensions;
 
@@ -32,34 +33,13 @@ public static class MinimalApiExtensions
             var scopeFactory = provider.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
-            var tables = ResolveTables(dbContext, entities);
+            var tablesNames = dbContext.GetTablesNames(entities);
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<ETagEndpointFilter>>();
-            var filter = new ETagEndpointFilter(tables);
+            var filter = new ETagEndpointFilter(tablesNames);
             return (context) =>
             {
                 return filter.InvokeAsync(context, next);
             };
         });
-    }
-
-    private static string[] ResolveTables<TContext>(TContext context, Type[] entities)
-         where TContext : DbContext
-    {
-        var result = new HashSet<string>();
-
-        var contextModel = context.Model;
-
-        foreach (var entity in entities ?? [])
-        {
-            var entityType = contextModel.FindEntityType(entity) ??
-                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
-
-            var tableName = entityType.GetSchemaQualifiedTableName() ??
-                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
-
-            result.Add(tableName);
-        }
-
-        return [.. result];
     }
 }

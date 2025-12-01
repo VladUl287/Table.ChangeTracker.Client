@@ -6,6 +6,7 @@ using Tracker.AspNet.Middlewares;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Extensions;
 
@@ -31,32 +32,10 @@ public static class SerivceCollectionExtensions
             var scopeFactory = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
-            var tables = ResolveTables(dbContext, options.Entities);
-
-            options.Tables = [.. options.Tables, .. tables];
+            var tablesNames = dbContext.GetTablesNames(options.Entities);
+            options.Tables = [.. options.Tables, .. tablesNames];
         }
 
         return builder.UseMiddleware<TrackerMiddleware<TContext>>(options);
-    }
-
-    private static string[] ResolveTables<TContext>(TContext context, Type[] entities)
-        where TContext : DbContext
-    {
-        var result = new HashSet<string>();
-
-        var contextModel = context.Model;
-
-        foreach (var entity in entities ?? [])
-        {
-            var entityType = contextModel.FindEntityType(entity) ??
-                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
-
-            var tableName = entityType.GetSchemaQualifiedTableName() ??
-                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
-
-            result.Add(tableName);
-        }
-
-        return [.. result];
     }
 }
