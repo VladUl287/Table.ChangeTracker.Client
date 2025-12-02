@@ -8,9 +8,9 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) : IRequestFilter
+public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) : IRequestFilter
 {
-    public virtual bool ShouldProcessRequest<TState>(HttpContext context, Func<TState, GlobalOptions> optionsProvider, TState state)
+    public bool ShouldProcessRequest<TState>(HttpContext context, Func<TState, GlobalOptions> optionsProvider, TState state)
     {
         if (!HttpMethods.IsGet(context.Request.Method))
         {
