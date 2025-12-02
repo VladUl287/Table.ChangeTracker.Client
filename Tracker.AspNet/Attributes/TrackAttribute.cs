@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Tracker.AspNet.Extensions;
+using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Attributes;
@@ -26,10 +27,13 @@ public sealed class TrackAttribute() : Attribute, IAsyncActionFilter
             return;
         }
 
+        var options = context.HttpContext.RequestServices.GetRequiredService<GlobalOptions>().Copy();
+        options.Tables = Tables;
+
         var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
         var token = context.HttpContext.RequestAborted;
 
-        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, options, token);
         if (shouldReturnNotModified)
         {
             context.Result = new StatusCodeResult(StatusCodes.Status304NotModified);

@@ -13,7 +13,7 @@ public sealed class ETagEndpointFilter() : IEndpointFilter
         Options = options;
     }
     
-    public GlobalOptions? Options { get; }
+    public GlobalOptions Options { get; }
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -23,8 +23,7 @@ public sealed class ETagEndpointFilter() : IEndpointFilter
         var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
         var token = context.HttpContext.RequestAborted;
 
-        var tables = Options?.Tables ?? [];
-        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, tables, token);
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Options, token);
         if (shouldReturnNotModified)
             return Results.StatusCode(StatusCodes.Status304NotModified);
 

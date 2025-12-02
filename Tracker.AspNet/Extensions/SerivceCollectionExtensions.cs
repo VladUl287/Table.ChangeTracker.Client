@@ -39,8 +39,7 @@ public static class SerivceCollectionExtensions
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder)
         where TContext : DbContext
     {
-        var options = new GlobalOptions();
-        return builder.UseTracker<TContext>(options);
+        return builder.UseMiddleware<TrackerMiddleware>();
     }
 
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, Action<GlobalOptions> configure)

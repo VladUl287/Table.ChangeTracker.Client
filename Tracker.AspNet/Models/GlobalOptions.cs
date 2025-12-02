@@ -13,4 +13,17 @@ public sealed class GlobalOptions
     public TimeSpan TablesCacheLifeTime { get; set; }
 
     public Func<HttpContext, string> Suffix { get; set; } = (_) => string.Empty;
+
+    public GlobalOptions Copy()
+    {
+        return new GlobalOptions
+        {
+            Filter = Filter,
+            Tables = Tables?.ToArray() ?? [],
+            Entities = Entities?.ToArray() ?? [],
+            XactCacheLifeTime = XactCacheLifeTime,
+            TablesCacheLifeTime = TablesCacheLifeTime,
+            Suffix = Suffix
+        };
+    }
 }

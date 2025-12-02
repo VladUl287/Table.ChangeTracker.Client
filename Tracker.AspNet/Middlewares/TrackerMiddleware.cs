@@ -15,18 +15,9 @@ public sealed class TrackerMiddleware(RequestDelegate next, IETagService eTagSer
             return;
         }
 
-        if (opts is not null)
-        {
-            if (opts.Filter is null || !opts.Filter(context))
-            {
-                await next(context);
-                return;
-            }
-        }
-
         var token = context.RequestAborted;
 
-        var shouldReturnNotModified = await eTagService.TrySetETagAsync(context, opts?.Tables ?? [], token);
+        var shouldReturnNotModified = await eTagService.TrySetETagAsync(context, opts, token);
         if (shouldReturnNotModified)
         {
             context.Response.StatusCode = StatusCodes.Status304NotModified;

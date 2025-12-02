@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tracker.AspNet.Logging;
+using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 using Tracker.Core.Extensions;
 
@@ -11,10 +12,10 @@ namespace Tracker.AspNet.Services;
 public class ETagService<TContext>(
     IETagGenerator etagGenerator, ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
 {
-    public async Task<bool> TrySetETagAsync(HttpContext context, string[] tables, CancellationToken token = default)
+    public async Task<bool> TrySetETagAsync(HttpContext context, GlobalOptions options, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(context, nameof(context));
-        ArgumentNullException.ThrowIfNull(tables, nameof(tables));
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
 
         if (context.Response.Headers.ETag.Count != 0)
         {
@@ -29,7 +30,7 @@ public class ETagService<TContext>(
             return false;
         }
 
-        var etag = await GenerateETag(tables, dbContext, token);
+        var etag = await GenerateETag(options.Tables, dbContext, token);
         if (etag is null)
         {
             logger.LogLastTimestampNotFound();
