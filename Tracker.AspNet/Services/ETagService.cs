@@ -45,6 +45,7 @@ public class ETagService<TContext>(
 
         logger.LogETagAdded(etag);
         context.Response.Headers.ETag = etag;
+        context.Response.Headers.CacheControl = "no-cache";
         return false;
     }
 
