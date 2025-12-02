@@ -18,30 +18,31 @@ public sealed class TrackAttribute() : Attribute, IAsyncActionFilter
 
     public string[] Tables { get; } = [];
 
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
-        static GlobalOptions optionsProvider(HttpContext ctx) => ctx.RequestServices.GetRequiredService<GlobalOptions>();
+        static bool filter(HttpContext ctx) => ctx.RequestServices.GetRequiredService<GlobalOptions>().Filter(ctx);
 
-        var httpContext = context.HttpContext;
-        var requestFilter = httpContext.RequestServices.GetRequiredService<IRequestFilter>();
-        var shouldProcessRequest = requestFilter.ShouldProcessRequest(httpContext, optionsProvider, httpContext);
+        var context = execContext.HttpContext;
+
+        var requestFilter = context.RequestServices.GetRequiredService<IRequestFilter>();
+        var shouldProcessRequest = requestFilter.ShouldProcessRequest(context, filter);
         if (!shouldProcessRequest)
         {
             await next();
             return;
         }
 
-        var options = optionsProvider(httpContext);
+        var options = context.RequestServices.GetRequiredService<GlobalOptions>();
         options = options.Copy();
         options.Tables = Tables;
 
-        var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
-        var token = context.HttpContext.RequestAborted;
+        var etagService = execContext.HttpContext.RequestServices.GetRequiredService<IETagService>();
+        var token = execContext.HttpContext.RequestAborted;
 
-        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, options, token);
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(execContext.HttpContext, options, token);
         if (shouldReturnNotModified)
         {
-            context.Result = new StatusCodeResult(StatusCodes.Status304NotModified);
+            execContext.Result = new StatusCodeResult(StatusCodes.Status304NotModified);
             return;
         }
 

@@ -3,14 +3,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
-using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
 public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) : IRequestFilter
 {
-    public bool ShouldProcessRequest<TState>(HttpContext context, Func<TState, GlobalOptions> optionsProvider, TState state)
+    public bool ShouldProcessRequest(HttpContext context, Func<HttpContext, bool> filter)
     {
         if (!HttpMethods.IsGet(context.Request.Method))
         {
@@ -30,8 +29,7 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
             return false;
         }
 
-        var options = optionsProvider(state);
-        if (!options.Filter(context))
+        if (!filter(context))
         {
             logger.LogFilterRejected(context.Request.Path);
             return false;
