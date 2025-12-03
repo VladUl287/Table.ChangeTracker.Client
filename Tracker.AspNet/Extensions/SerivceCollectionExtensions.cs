@@ -50,7 +50,7 @@ public static class SerivceCollectionExtensions
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder)
         where TContext : DbContext
     {
-        return builder.UseTracker<TContext>();
+        return builder.UseMiddleware<TrackerMiddleware>();
     }
 
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, GlobalOptions options)
