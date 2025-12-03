@@ -10,7 +10,7 @@ namespace Tracker.AspNet.Services;
 
 public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) : IRequestFilter
 {
-    public bool ShouldProcessRequest<TState>(HttpContext context, Func<TState, ImmutableGlobalOptions> optionsProvider, TState state)
+    public bool ShouldProcessRequest(HttpContext context, ImmutableGlobalOptions options)
     {
         if (!HttpMethods.IsGet(context.Request.Method))
         {
@@ -30,7 +30,6 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
             return false;
         }
 
-        var options = optionsProvider(state);
         if (!options.Filter(context))
         {
             logger.LogFilterRejected(context.Request.Path);
@@ -39,6 +38,11 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
 
         logger.LogRequestValidated(context.Request.Path);
         return true;
+    }
+
+    public bool ShouldProcessRequest<TState>(HttpContext context, Func<TState, ImmutableGlobalOptions> options, TState state)
+    {
+        throw new NotImplementedException();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
