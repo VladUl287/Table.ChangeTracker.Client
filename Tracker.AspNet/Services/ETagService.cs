@@ -7,9 +7,9 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public class ETagService<TContext>(
-    IETagGenerator etagGenerator, IDbOperationsFactory dbOperationsFactory, 
-    ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
+public class ETagService(
+    IETagGenerator etagGenerator, IDbOperationsFactory dbOperationsFactory,
+    ILogger<ETagService> logger) : IETagService
 {
     public async Task<bool> TrySetETagAsync(HttpContext context, ImmutableGlobalOptions options, CancellationToken token)
     {
@@ -36,10 +36,47 @@ public class ETagService<TContext>(
         return false;
     }
 
-    private async Task<string?> GenerateETag(ImmutableGlobalOptions options, CancellationToken token)
+    public async Task<bool> TrySetETagAsync<TContext>(HttpContext context, ImmutableGlobalOptions options, CancellationToken token)
+        where TContext : DbContext
+    {
+        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
+
+        var etag = await GenerateETag<TContext>(options, token);
+        if (etag is null)
+        {
+            logger.LogLastTimestampNotFound();
+            return false;
+        }
+
+        if (context.Request.Headers.IfNoneMatch == etag)
+        {
+            logger.LogNotModified(etag);
+            context.Response.StatusCode = StatusCodes.Status304NotModified;
+            return true;
+        }
+
+        logger.LogETagAdded(etag);
+        context.Response.Headers.ETag = etag;
+        context.Response.Headers.CacheControl = "no-cache";
+        return false;
+    }
+
+    private Task<string?> GenerateETag(ImmutableGlobalOptions options, CancellationToken token)
     {
         var dbOpeartions = dbOperationsFactory.Create(options.Provider);
+        return GetETag(options, dbOpeartions, token);
+    }
 
+    private Task<string?> GenerateETag<TContext>(ImmutableGlobalOptions options, CancellationToken token)
+        where TContext : DbContext
+    {
+        var dbOpeartions = dbOperationsFactory.Create<TContext>(options.Provider);
+        return GetETag(options, dbOpeartions, token);
+    }
+
+    private async Task<string?> GetETag(ImmutableGlobalOptions options, IDbOperations dbOpeartions, CancellationToken token)
+    {
         if (options is { Tables.Length: 0 })
         {
             var xact = await dbOpeartions.GetLastCommittedXact(token);
@@ -62,6 +99,7 @@ public class ETagService<TContext>(
             }
             timestamps.Add(lastTimestamp.Value);
         }
+
         return etagGenerator.GenerateETag([.. timestamps]);
     }
 }
