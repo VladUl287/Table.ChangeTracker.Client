@@ -17,9 +17,13 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
         var tablesNames = dbContext.GetTablesNames(options.Entities);
         var tables = new HashSet<string>([.. options.Tables, .. tablesNames]).ToImmutableArray();
 
+        var source = options.Source;
+        if (string.IsNullOrEmpty(source))
+            source = typeof(TContext).GetTypeHashId();
+
         return new ImmutableGlobalOptions
         {
-            Source = options.Source,
+            Source = source,
             Filter = options.Filter,
             Suffix = options.Suffix,
             Tables = tables,
