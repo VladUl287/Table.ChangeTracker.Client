@@ -66,3 +66,22 @@ public sealed class NpgsqlDbOperations<TContext>(IServiceScopeFactory scopeFacto
     }
 
 }
+
+//public sealed class NpgsqlDbOperations<TContext>(NpgsqlDataSource dataSource)
+//{
+//    public async Task<DateTimeOffset?> GetLastTimestamp(string table, CancellationToken token)
+//    {
+//        ArgumentException.ThrowIfNullOrEmpty(table, nameof(table));
+
+//        await using var command = dataSource.CreateCommand("SELECT get_last_timestamp(@table_name);");
+
+//        command.Parameters.AddWithValue("table_name", table);
+
+//        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
+
+//        if (await reader.ReadAsync(token))
+//            return await reader.GetFieldValueAsync<DateTimeOffset?>(0, token);
+
+//        return null;
+//    }
+//}
