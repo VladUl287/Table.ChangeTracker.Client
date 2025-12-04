@@ -7,3 +7,4 @@ TODO:
     - NpgsqlDataSource get timestamp like DateTimeOffset without cast
     - Different cache-control predefined profiles and cache-control value builder
     - Etag make it value type and not string
+    - Add global options validation
