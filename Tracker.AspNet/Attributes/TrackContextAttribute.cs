@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Attributes;
 
@@ -62,8 +63,10 @@ public sealed class TrackAttribute<TContext> : Attribute, IAsyncActionFilter
                 return _actionOptions;
 
             var baseOptions = execContext.HttpContext.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
+            var source = typeof(TContext).GetTypeHashId();
             _actionOptions = baseOptions with
             {
+                Source = source,
                 Tables = _tables
             };
             return _actionOptions;

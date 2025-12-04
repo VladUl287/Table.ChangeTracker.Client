@@ -5,6 +5,7 @@ using Npgsql;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Extensions;
 
@@ -78,9 +79,10 @@ public static class SerivceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
+            var sourceId = typeof(TContext).GetTypeHashId();
             var builder = new NpgsqlDataSourceBuilder(connectionString);
             var dataSource = builder.Build();
-            return new NpgsqlOperations(dataSource);
+            return new NpgsqlOperations(sourceId, dataSource);
         });
     }
 
@@ -89,6 +91,7 @@ public static class SerivceCollectionExtensions
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
         return services.AddSingleton<ISourceOperations>(
             new NpgsqlOperations(
+                string.Empty,
                 new NpgsqlDataSourceBuilder(connectionString).Build()
             )
         );

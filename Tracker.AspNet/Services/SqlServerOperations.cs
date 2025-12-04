@@ -5,7 +5,7 @@ namespace Tracker.AspNet.Services;
 
 public sealed class SqlServerOperations(DbDataSource dataSource) : ISourceOperations
 {
-    public string SourceId => throw new NotImplementedException();
+    public string SourceId => string.Empty;
 
     public async Task<DateTimeOffset?> GetLastTimestamp(string key, CancellationToken token)
     {
