@@ -9,9 +9,9 @@ public sealed class SourceOperationsResolver(
     private readonly FrozenDictionary<string, ISourceOperations> _store
         = sourceOperations.ToFrozenDictionary(c => c.SourceId);
 
-    public ISourceOperations Resolve(string sourceId)
+    public ISourceOperations Resolve(string? sourceId)
     {
-        if (_store.TryGetValue(sourceId, out var value))
+        if (sourceId is not null && _store.TryGetValue(sourceId, out var value))
             return value;
 
         return _store.Values[0];

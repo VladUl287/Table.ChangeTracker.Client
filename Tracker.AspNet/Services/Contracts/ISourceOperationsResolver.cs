@@ -2,5 +2,5 @@
 
 public interface ISourceOperationsResolver
 {
-    ISourceOperations Resolve(string sourceId);
+    ISourceOperations Resolve(string? sourceId);
 }
