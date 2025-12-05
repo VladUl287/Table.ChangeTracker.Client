@@ -17,9 +17,9 @@ public sealed class CacheControlBuilder
     private const byte PrivateFlag = 1 << 6;
     private const byte PublicFlag = 1 << 7;
 
-    private const byte ImmutableFlag = 1 << 1;
-    private const byte StaleWhileRevalidate = 1 << 2;
-    private const byte StaleIfError = 1 << 3;
+    private const byte ImmutableFlag = 1 << 0;
+    private const byte StaleWhileRevalidate = 1 << 1;
+    private const byte StaleIfError = 1 << 2;
 
     private int? _maxAge;
 
