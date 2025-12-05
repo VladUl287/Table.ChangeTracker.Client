@@ -1,10 +1,8 @@
-﻿using Tracker.AspNet.Models;
-
-namespace Tracker.AspNet.Services.Contracts;
+﻿namespace Tracker.AspNet.Services.Contracts;
 
 public interface IETagGenerator
 {
-    string GenerateETag(DateTimeOffset timestamp);
-    string GenerateETag(params DateTimeOffset[] timestamps);
-    string GenerateETag(uint xact);
+    string GenerateETag(DateTimeOffset timestamp, string suffix);
+    string GenerateETag(DateTimeOffset[] timestamps, string suffix);
+    string GenerateETag(uint xact, string suffix);
 }

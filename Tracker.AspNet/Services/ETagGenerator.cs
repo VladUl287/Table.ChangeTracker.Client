@@ -1,22 +1,41 @@
-﻿using Tracker.AspNet.Services.Contracts;
-using Tracker.AspNet.Utils;
+﻿using System.Reflection;
+using Tracker.Core.Extensions;
+using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public class ETagGenerator : IETagGenerator
+public class ETagGenerator(Assembly executionAssembly) : IETagGenerator
 {
-    public string GenerateETag(DateTimeOffset timestamp)
+    private readonly DateTimeOffset AssemblyBuildTime = executionAssembly.GetAssemblyWriteTime();
+
+    public string GenerateETag(DateTimeOffset timestamp, string suffix)
     {
-        return ETagUtils.GenETagTicks(timestamp);
+        var etag = $"{AssemblyBuildTime.Ticks}-{timestamp.Ticks}";
+        if (!string.IsNullOrEmpty(suffix))
+            etag += $"-{suffix}";
+        return etag;
     }
 
-    public string GenerateETag(params DateTimeOffset[] timestamps)
+    public string GenerateETag(DateTimeOffset[] timestamps, string suffix)
     {
-        return ETagUtils.GenETagTicks(timestamps);
+        long xorResult = 0;
+
+        foreach (var timestamp in timestamps)
+            xorResult ^= timestamp.UtcTicks;
+
+        var x16 = xorResult.ToString("x16");
+        var etag = $"{AssemblyBuildTime.Ticks}-{x16}";
+        if (!string.IsNullOrEmpty(suffix))
+            etag += $"-{suffix}";
+        return etag;
     }
 
-    public string GenerateETag(uint xact)
+    public string GenerateETag(uint xact, string suffix)
     {
-        throw new NotImplementedException();
+        var x16 = xact.ToString("x16");
+        var etag = $"{AssemblyBuildTime.Ticks}-{x16}";
+        if (!string.IsNullOrEmpty(suffix))
+            etag += $"-{suffix}";
+        return etag;
     }
 }
