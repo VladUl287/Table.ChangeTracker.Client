@@ -6,7 +6,8 @@ public sealed class CacheControlBuilder
 {
     private readonly List<string> _directives = [];
 
-    private byte _flags;
+    private byte _flags_1;
+    private byte _flags_2;
 
     private const byte NoCacheFlag = 1 << 0;
     private const byte NoStoreFlag = 1 << 1;
@@ -31,13 +32,19 @@ public sealed class CacheControlBuilder
 
     public CacheControlBuilder WithNoCache()
     {
-        _flags |= NoCacheFlag;
+        _flags_1 |= NoCacheFlag;
         return this;
     }
 
     public CacheControlBuilder WithNoStore()
     {
-        _flags |= NoStoreFlag;
+        _flags_1 |= NoStoreFlag;
+        return this;
+    }
+
+    public CacheControlBuilder WithImmutable()
+    {
+        _flags_2 |= ImmutableFlag;
         return this;
     }
 
@@ -55,29 +62,38 @@ public sealed class CacheControlBuilder
 
     private void AppendBooleanDirectives(StringBuilder sb)
     {
-        if ((_flags & NoCacheFlag) != 0)
+        if ((_flags_1 & NoCacheFlag) != 0)
             sb.Append("no-cache");
 
-        if ((_flags & NoStoreFlag) != 0)
+        if ((_flags_1 & NoStoreFlag) != 0)
             sb.Append("no-store");
 
-        if ((_flags & PrivateFlag) != 0)
-            sb.Append("private");
-
-        if ((_flags & PublicFlag) != 0)
-            sb.Append("public");
-
-        if ((_flags & MustRevalidateFlag) != 0)
-            sb.Append("must-revalidate");
-
-        if ((_flags & ProxyRevalidateFlag) != 0)
-            sb.Append("proxy-revalidate");
-
-        if ((_flags & NoTransformFlag) != 0)
+        if ((_flags_1 & NoTransformFlag) != 0)
             sb.Append("no-transform");
 
-        if ((_flags & ImmutableFlag) != 0)
+        if ((_flags_1 & MustRevalidateFlag) != 0)
+            sb.Append("must-revalidate");
+
+        if ((_flags_1 & ProxyRevalidateFlag) != 0)
+            sb.Append("proxy-revalidate");
+
+        if ((_flags_1 & MustUnderstandFlag) != 0)
+            sb.Append("must-understand");
+
+        if ((_flags_1 & PrivateFlag) != 0)
+            sb.Append("private");
+
+        if ((_flags_1 & PublicFlag) != 0)
+            sb.Append("public");
+
+        if ((_flags_2 & ImmutableFlag) != 0)
             sb.Append("immutable");
+
+        if ((_flags_2 & StaleWhileRevalidate) != 0)
+            sb.Append("stale-while-revalidate");
+
+        if ((_flags_2 & StaleIfError) != 0)
+            sb.Append("stale-if-error");
     }
 
     private void AppendCustomDirectives(StringBuilder sb)
