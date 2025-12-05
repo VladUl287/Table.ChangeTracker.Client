@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
@@ -10,26 +9,19 @@ using Tracker.Core.Extensions;
 namespace Tracker.AspNet.Attributes;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class TrackAttribute<TContext> : Attribute, IAsyncActionFilter
+public sealed class TrackAttribute<TContext>(params string[] tables) : Attribute, IAsyncActionFilter
     where TContext : DbContext
 {
-    private ImmutableGlobalOptions? _actionOptions;
-    private readonly Lock _lock = new();
-    private readonly ImmutableArray<string> _tables = [];
+    private readonly string[] _tables = tables ?? throw new NullReferenceException();
     private readonly string? _sourceId = null;
     private readonly string? _cacheControl = null;
 
-    public TrackAttribute(params string[] tables)
-    {
-        ArgumentNullException.ThrowIfNull(tables, nameof(tables));
-        _tables = [.. tables];
-    }
+    public TrackAttribute(string? sourceId = null, params string[] tables) : this(tables)
+        => _sourceId = sourceId;
 
-    public TrackAttribute(string? sourceId = null, string? cacheControl = null, params string[] tables) : this(tables)
-    {
-        _sourceId = sourceId;
-        _cacheControl = cacheControl;
-    }
+    public TrackAttribute(string? sourceId = null, string? cacheControl = null, params string[] tables) : this(sourceId, tables)
+        => _cacheControl = cacheControl;
+
 
     public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
@@ -58,6 +50,9 @@ public sealed class TrackAttribute<TContext> : Attribute, IAsyncActionFilter
         }
     }
 
+    private ImmutableGlobalOptions? _actionOptions;
+    private readonly Lock _lock = new();
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ImmutableGlobalOptions GetOrSetOptions(ActionExecutingContext execContext)
     {
@@ -72,9 +67,9 @@ public sealed class TrackAttribute<TContext> : Attribute, IAsyncActionFilter
             var baseOptions = execContext.HttpContext.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
             _actionOptions = baseOptions with
             {
-                Source = _sourceId ?? baseOptions.Source ?? typeof(TContext).GetTypeHashId(),
                 CacheControl = _cacheControl ?? baseOptions.CacheControl,
-                Tables = _tables
+                Source = _sourceId ?? baseOptions.Source ?? typeof(TContext).GetTypeHashId(),
+                Tables = [.. _tables]
             };
             return _actionOptions;
         }
