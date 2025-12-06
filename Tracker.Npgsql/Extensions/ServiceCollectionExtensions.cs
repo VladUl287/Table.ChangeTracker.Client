@@ -39,7 +39,7 @@ public static class ServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrEmpty(sourceId);
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
-        return services.AddSingleton<ISourceOperations>(
+        return services.AddSingleton<ISourceOperations>((_) =>
             new NpgsqlOperations(sourceId, connectionString)
         );
     }

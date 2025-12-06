@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrEmpty(sourceId);
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
-        return services.AddSingleton<ISourceOperations>((provider) =>
+        return services.AddSingleton<ISourceOperations>((_) =>
             new SqlServerOperations(sourceId, connectionString)
         );
     }
