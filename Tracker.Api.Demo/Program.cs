@@ -12,9 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
         .AddTracker<DatabaseContext>(conf =>
         {
         })
-        .AddNpgsql<DatabaseContext>()
-        .AddNpgsql("source1", "Host=localhost;Port=5432;Database=test123;Username=postgres;Password=postgres")
-        .AddSqlServer("source2", "Server=localhost;Database=MyDb;Trusted_Connection=true;")
+        .AddNpgsqlSource<DatabaseContext>()
+        .AddNpgsqlSource("source1", "Host=localhost;Port=5432;Database=test123;Username=postgres;Password=postgres")
+        .AddSqlServerSource("source2", "Server=localhost;Database=MyDb;Trusted_Connection=true;")
         .AddDbContext<DatabaseContext>(options =>
         {
             options
