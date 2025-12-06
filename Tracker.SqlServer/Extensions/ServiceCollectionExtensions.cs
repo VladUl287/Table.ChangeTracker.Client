@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Tracker.Core.Extensions;
 using Tracker.Core.Services.Contracts;
@@ -15,10 +14,7 @@ public static class ServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
         return services.AddSingleton<ISourceOperations>((provider) =>
-            new SqlServerOperations(
-               sourceId,
-               SqlClientFactory.Instance.CreateDataSource(connectionString)
-            )
+            new SqlServerOperations(sourceId, connectionString)
         );
     }
 
@@ -40,8 +36,7 @@ public static class ServiceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
-            var dataSource = SqlClientFactory.Instance.CreateDataSource(connectionString);
-            return new SqlServerOperations(sourceId, dataSource);
+            return new SqlServerOperations(sourceId, connectionString);
         });
     }
 }

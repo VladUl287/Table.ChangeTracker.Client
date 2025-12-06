@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Tracker.Core.Extensions;
@@ -20,7 +21,7 @@ public static class ServiceCollectionExtensions
          where TContext : DbContext
     {
         ArgumentException.ThrowIfNullOrEmpty(sourceId);
-
+        
         return services.AddSingleton<ISourceOperations>((provider) =>
         {
             using var scope = provider.CreateScope();
@@ -29,9 +30,7 @@ public static class ServiceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
-            var builder = new NpgsqlDataSourceBuilder(connectionString);
-            var dataSource = builder.Build();
-            return new NpgsqlOperations(sourceId, dataSource);
+            return new NpgsqlOperations(sourceId, connectionString);
         });
     }
 
@@ -41,9 +40,7 @@ public static class ServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
         return services.AddSingleton<ISourceOperations>(
-            new NpgsqlOperations(
-                sourceId, new NpgsqlDataSourceBuilder(connectionString).Build()
-            )
+            new NpgsqlOperations(sourceId, connectionString)
         );
     }
 
