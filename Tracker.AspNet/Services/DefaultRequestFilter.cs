@@ -40,11 +40,6 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
         return true;
     }
 
-    public bool ShouldProcessRequest<TState>(HttpContext context, Func<TState, ImmutableGlobalOptions> options, TState state)
-    {
-        throw new NotImplementedException();
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool HasNotValidCacheControl(StringValues cacheControlHeaders)
     {
