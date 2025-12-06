@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Tracker.Api.Demo.Database;
 using Tracker.AspNet.Extensions;
 using Tracker.Npgsql.Extensions;
+using Tracker.SqlServer.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {

@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using Tracker.Core.Services.Contracts;
 
-namespace Tracker.AspNet.Services;
+namespace Tracker.SqlServer.Services;
 
 public sealed class SqlServerOperations(string sourceId, DbDataSource dataSource) : ISourceOperations
 {
