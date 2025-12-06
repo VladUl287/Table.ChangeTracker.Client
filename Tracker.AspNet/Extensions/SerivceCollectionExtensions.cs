@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using System.Reflection;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
@@ -31,7 +32,7 @@ public static class SerivceCollectionExtensions
             return optionsBuilder.Build<TContext>(options);
         });
 
-        services.AddSingleton<IETagGenerator, ETagGenerator>();
+        services.AddSingleton<IETagGenerator>(new ETagGenerator(Assembly.GetExecutingAssembly()));
         services.AddSingleton<IETagService, ETagService>();
 
         services.AddSingleton<ISourceOperationsResolver, SourceOperationsResolver>();
