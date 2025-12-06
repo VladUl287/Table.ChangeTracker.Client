@@ -48,7 +48,7 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
         return null;
     }
 
-    public Task<IEnumerable<DateTimeOffset>> GetLastTimestamp(string[] keys, CancellationToken token)
+    public Task<IEnumerable<DateTimeOffset>> GetLastTimestamp(ReadOnlySpan<string> keys, CancellationToken token)
     {
         throw new NotImplementedException();
     }
