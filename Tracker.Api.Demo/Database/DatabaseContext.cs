@@ -19,3 +19,19 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             });
     }
 }
+
+public sealed class SqlServerDatabaseContext(DbContextOptions<SqlServerDatabaseContext> options) : DbContext(options)
+{
+    public DbSet<Role> Roles => Set<Role>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder
+            .Entity<Role>(builder =>
+            {
+                builder.HasKey(c => c.Id);
+            });
+    }
+}

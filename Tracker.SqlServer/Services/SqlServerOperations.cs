@@ -11,7 +11,7 @@ public sealed class SqlServerOperations(string sourceId, DbDataSource dataSource
     {
         ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
 
-        return null;
+        return DateTimeOffset.Parse("12.12.2001");
     }
 
     public Task<IEnumerable<DateTimeOffset>> GetLastTimestamp(string[] keys, CancellationToken token)

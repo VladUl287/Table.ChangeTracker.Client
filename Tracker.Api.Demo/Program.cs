@@ -11,20 +11,28 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddOpenApi();
 
     builder.Services
-        .AddTracker<DatabaseContext>(conf =>
-        {
-        })
+        .AddTracker()
         .AddNpgsqlSource<DatabaseContext>()
+        .AddSqlServerSource<SqlServerDatabaseContext>()
         .AddNpgsqlSource("source1", "Host=localhost;Port=5432;Database=test123;Username=postgres;Password=postgres")
-        .AddSqlServerSource("source2", "Server=localhost;Database=MyDb;Trusted_Connection=true;")
-        .AddDbContext<DatabaseContext>(options =>
-        {
-            options
-                .UseNpgsql("Host=localhost;Port=5432;Database=main;Username=postgres;Password=postgres")
-                .EnableSensitiveDataLogging()
-                .EnableDetailedErrors();
-        });
-    }
+        .AddSqlServerSource("source2", "Server=localhost;Database=TrackerTestDb;Trusted_Connection=true;");
+
+    builder.Services.AddDbContext<DatabaseContext>(options =>
+    {
+        options
+            .UseNpgsql("Host=localhost;Port=5432;Database=main;Username=postgres;Password=postgres")
+            .EnableSensitiveDataLogging()
+            .EnableDetailedErrors();
+    });
+
+    builder.Services.AddDbContext<SqlServerDatabaseContext>(options =>
+    {
+        options
+            .UseSqlServer("Data Source=localhost,1433;User ID=sa;Password=Password1;Database=TrackerTestDb;TrustServerCertificate=True;")
+            .EnableSensitiveDataLogging()
+            .EnableDetailedErrors();
+    });
+}
 
 var app = builder.Build();
 {
