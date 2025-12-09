@@ -19,7 +19,7 @@ public static class SerivceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(options, nameof(options));
 
-        services.AddSingleton<ITimestampsHasher, Fnv1aTimstampsHasher>();
+        services.AddSingleton<ITimestampsHasher, XxHash64Hasher>();
 
         services.AddSingleton<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>, GlobalOptionsBuilder>();
 

@@ -7,7 +7,7 @@ public sealed class Fnv1aTimstampsHasher : ITimestampsHasher
     private const ulong FnvOffsetBasis = 14695981039346656037UL;
     private const ulong FnvPrime = 1099511628211UL;
 
-    public ulong Hash(Span<DateTimeOffset> timestamps)
+    public ulong Hash(ReadOnlySpan<DateTimeOffset> timestamps)
     {
         ulong hash = FnvOffsetBasis;
 
