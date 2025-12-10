@@ -9,7 +9,7 @@ using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public class RequestHandler(
+public sealed class RequestHandler(
     IETagService eTagService, ISourceOperationsResolver operationsResolver, ITimestampsHasher timestampsHasher,
     ILogger<RequestHandler> logger) : IRequestHandler
 {
