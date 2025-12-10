@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
+using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 using Tracker.Core.Extensions;
@@ -20,7 +22,7 @@ public sealed class TrackAttribute<TContext>(
     private ImmutableGlobalOptions? _actionOptions;
     private readonly Lock _lock = new();
 
-    protected override ImmutableGlobalOptions GetOptions(ActionExecutingContext execCtx)
+    protected override ImmutableGlobalOptions GetOptions(ActionExecutingContext ctx)
     {
         if (_actionOptions is not null)
             return _actionOptions;
@@ -30,61 +32,62 @@ public sealed class TrackAttribute<TContext>(
             if (_actionOptions is not null)
                 return _actionOptions;
 
-            var scopeFactory = execCtx.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+            var scopeFactory = ctx.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
-
             var serviceProvider = scope.ServiceProvider;
+
             var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
-            var opResolver = serviceProvider.GetRequiredService<ISourceOperationsResolver>();
+            var sourceResolver = serviceProvider.GetRequiredService<ISourceOperationsResolver>();
             var sourceIdGenerator = serviceProvider.GetRequiredService<ISourceIdGenerator>();
             var logger = serviceProvider.GetRequiredService<ILogger<TrackAttribute<TContext>>>();
 
-             cacheControl ??= options.CacheControl;
-            if (sourceId is null)
-            {
-                var generatedSourceId = sourceIdGenerator.GenerateId<TContext>();
-                if (opResolver.Registered(generatedSourceId))
-                {
-                    sourceId = generatedSourceId;
-                    logger.LogInformation("Source id {sourceId} taked from TContext type hash due param source id is null.", sourceId);
-                }
-                else
-                {
-                    sourceId = options.Source;
-                    logger.LogInformation("Source id {sourceId} taked from options due TContext not registered.", sourceId);
-                }
-            }
+            cacheControl ??= options.CacheControl;
+            sourceId ??= TryEnsureSourceId(ctx, options, sourceResolver, sourceIdGenerator, logger);
 
-            return _actionOptions = options with
+            _actionOptions = options with
             {
                 Source = sourceId,
                 CacheControl = cacheControl,
-                Tables = GetAndCombineTablesNames(tables, entities, serviceProvider, logger)
+                Tables = GetAndCombineTablesNames(ctx, tables, entities, serviceProvider, logger)
             };
+            logger.LogOptionsBuilded(GetActionName(ctx), _actionOptions);
+            return _actionOptions;
         }
     }
 
-    private static ImmutableArray<string> GetAndCombineTablesNames(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string GetActionName(ActionExecutingContext ctx) =>
+        ctx.ActionDescriptor.DisplayName ?? ctx.ActionDescriptor.Id;
+
+    private static string? TryEnsureSourceId(ActionExecutingContext ctx, ImmutableGlobalOptions options,
+        ISourceOperationsResolver sourceResolver, ISourceIdGenerator sourceIdGenerator,
+        ILogger<TrackAttribute<TContext>> logger)
+    {
+        var sourceId = sourceIdGenerator.GenerateId<TContext>();
+        if (sourceResolver.Registered(sourceId))
+        {
+            logger.LogSourceIdGenerateFromTContext(GetActionName(ctx));
+            return sourceId;
+        }
+
+        logger.LogSourceIdTakedFromOptions(GetActionName(ctx));
+        return options.Source;
+    }
+
+    private static ImmutableArray<string> GetAndCombineTablesNames(ActionExecutingContext ctx,
         string[]? tables, Type[]? entities, IServiceProvider serviceProvider, ILogger<TrackAttribute<TContext>> logger)
     {
         var tablesNames = new HashSet<string>();
         foreach (var tableName in tables ?? [])
-        {
             if (!tablesNames.Add(tableName))
-                logger.LogWarning("Table name duplicated. It will be skipped");
-        }
+                logger.LogTableNameDuplicated(tableName, GetActionName(ctx));
 
         if (entities is { Length: > 0 })
         {
-            logger.LogInformation("Start resolve tables names from context");
-
             var dbContext = serviceProvider.GetRequiredService<TContext>();
-            var entitiesTablesNames = dbContext.GetTablesNames(entities ?? []);
-            foreach (var table in entitiesTablesNames)
-            {
-                if (!tablesNames.Add(table))
-                    logger.LogWarning("Entity table name duplicated. It will be skipped");
-            }
+            foreach (var tableName in dbContext.GetTablesNames(entities))
+                if (!tablesNames.Add(tableName))
+                    logger.LogTableNameDuplicated(tableName, GetActionName(ctx));
         }
 
         return [.. tablesNames];
