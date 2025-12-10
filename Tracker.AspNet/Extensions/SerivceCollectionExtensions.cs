@@ -29,7 +29,7 @@ public static class SerivceCollectionExtensions
             return optionsBuilder.Build(options);
         });
 
-        services.AddSingleton<IETagGenerator>(new ETagGenerator(Assembly.GetExecutingAssembly()));
+        services.AddSingleton<IETagService>(new ETagService(Assembly.GetExecutingAssembly()));
         services.AddSingleton<IRequestHandler, RequestHandler>();
 
         services.AddSingleton<ISourceOperationsResolver, SourceOperationsResolver>();
@@ -66,7 +66,7 @@ public static class SerivceCollectionExtensions
             return optionsBuilder.Build<TContext>(options);
         });
 
-        services.AddSingleton<IETagGenerator>(new ETagGenerator(Assembly.GetExecutingAssembly()));
+        services.AddSingleton<IETagService>(new ETagService(Assembly.GetExecutingAssembly()));
         services.AddSingleton<IRequestHandler, RequestHandler>();
 
         services.AddSingleton<ISourceOperationsResolver, SourceOperationsResolver>();

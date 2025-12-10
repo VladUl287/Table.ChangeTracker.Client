@@ -5,14 +5,13 @@ using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
-using Tracker.Core.Extensions;
 using Tracker.Core.Services.Contracts;
 using Tracker.Core.Utils;
 
 namespace Tracker.AspNet.Services;
 
 public class RequestHandler(
-    IETagGenerator etagGenerator, ISourceOperationsResolver operationsResolver, ITimestampsHasher timestampsHasher,
+    IETagService eTagService, ISourceOperationsResolver operationsResolver, ITimestampsHasher timestampsHasher,
     ILogger<RequestHandler> logger) : IRequestHandler
 {
     public async Task<bool> IsNotModified(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token)
@@ -22,72 +21,48 @@ public class RequestHandler(
 
         var sourceOperations = GetOperationsProvider(ctx, options, operationsResolver);
 
-        ulong ltValue;
-        if (options is { Tables.Length: 0 })
-        {
-            var tm = await sourceOperations.GetLastTimestamp(token);
-            ltValue = (ulong)tm.Ticks;
-        }
-        else if (options is { Tables.Length: 1 })
-        {
-            var tm = await sourceOperations.GetLastTimestamp(options.Tables[0], token);
-            ltValue = (ulong)tm.Ticks;
-        }
-        else
-        {
-            var timestamps = ArrayPool<DateTimeOffset>.Shared.Rent(options.Tables.Length);
-            await sourceOperations.GetLastTimestamps(options.Tables, timestamps, token);
-            ltValue = timestampsHasher.Hash(timestamps.AsSpan(0, options.Tables.Length));
-            ArrayPool<DateTimeOffset>.Shared.Return(timestamps);
-        }
+        var ltValue = await GetLastTimestampValue(options, sourceOperations, token);
 
-        var incomingETag = ctx.Request.Headers.IfNoneMatch.Count > 0 ? ctx.Request.Headers.IfNoneMatch[0] : null;
+        var srcETag = ctx.Request.Headers.IfNoneMatch.Count > 0 ? ctx.Request.Headers.IfNoneMatch[0] : null;
 
-        var asBuildTime = etagGenerator.AssemblyBuildTimeTicks;
+        var asBuildTime = eTagService.AssemblyBuildTimeTicks;
         var ltDigitCount = UlongUtils.DigitCount(ltValue);
         var suffix = options.Suffix(ctx);
         var fullLength = asBuildTime.Length + 1 + ltDigitCount + suffix.Length + (suffix.Length > 0 ? 1 : 0);
 
-        if (incomingETag is not null && ETagEqual(fullLength, incomingETag, ltValue, asBuildTime, suffix))
+        if (srcETag is not null && eTagService.EqualsTo(fullLength, srcETag, ltValue, suffix))
         {
             ctx.Response.StatusCode = StatusCodes.Status304NotModified;
-            logger.LogNotModified(incomingETag);
+            logger.LogNotModified(srcETag);
             return true;
         }
 
         ctx.Response.Headers.CacheControl = options.CacheControl;
-        var etag = etagGenerator.BuildETag(fullLength, ltValue, suffix);
+        var etag = eTagService.Build(fullLength, ltValue, suffix);
         ctx.Response.Headers.ETag = etag;
         logger.LogETagAdded(etag);
         return false;
     }
 
-    private static bool ETagEqual(int fullLength, string inETag, ulong lTimestamp, string asBuildTime, string suffix)
+    private async Task<ulong> GetLastTimestampValue(ImmutableGlobalOptions options, ISourceOperations sourceOperations, CancellationToken token)
     {
-        var ltDigitCount = UlongUtils.DigitCount(lTimestamp);
+        if (options is { Tables.Length: 0 })
+        {
+            var tm = await sourceOperations.GetLastTimestamp(token);
+            return (ulong)tm.Ticks;
+        }
 
-        if (fullLength != inETag.Length)
-            return false;
+        if (options is { Tables.Length: 1 })
+        {
+            var tm = await sourceOperations.GetLastTimestamp(options.Tables[0], token);
+            return (ulong)tm.Ticks;
+        }
 
-        var incomingETag = inETag.AsSpan();
-        var rightEdge = asBuildTime.Length;
-        var inAsBuildTime = incomingETag[..rightEdge];
-        if (!inAsBuildTime.Equals(asBuildTime.AsSpan(), StringComparison.Ordinal))
-            return false;
-
-        var inTicks = incomingETag.Slice(++rightEdge, ltDigitCount);
-        if (!inTicks.EqualsLong(lTimestamp))
-            return false;
-
-        rightEdge += ltDigitCount;
-        if (rightEdge == incomingETag.Length)
-            return true;
-
-        var inSuffix = incomingETag[++rightEdge..];
-        if (!inSuffix.Equals(suffix, StringComparison.Ordinal))
-            return false;
-
-        return true;
+        var timestamps = ArrayPool<DateTimeOffset>.Shared.Rent(options.Tables.Length);
+        await sourceOperations.GetLastTimestamps(options.Tables, timestamps, token);
+        var result = timestampsHasher.Hash(timestamps.AsSpan(0, options.Tables.Length));
+        ArrayPool<DateTimeOffset>.Shared.Return(timestamps);
+        return result;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
