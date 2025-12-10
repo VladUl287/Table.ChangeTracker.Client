@@ -9,12 +9,6 @@ public class ETagService(Assembly executionAssembly) : IETagService
 {
     private readonly string _assemblyBuildTime = executionAssembly.GetAssemblyWriteTime().Ticks.ToString();
 
-    public string AssemblyBuildTimeTicks => _assemblyBuildTime;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int ComputeLength(ulong lastTimestamp, string suffix) =>
-        _assemblyBuildTime.Length + lastTimestamp.CountDigits() + suffix.Length + (suffix.Length > 0 ? 2 : 1);
-
     public bool EqualsTo(string ifNoneMatch, ulong lastTimestamp, string suffix)
     {
         var fullLength = ComputeLength(lastTimestamp, suffix);
@@ -64,4 +58,9 @@ public class ETagService(Assembly executionAssembly) : IETagService
             }
         });
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ComputeLength(ulong lastTimestamp, string suffix) =>
+        _assemblyBuildTime.Length + lastTimestamp.CountDigits() + suffix.Length + (suffix.Length > 0 ? 2 : 1);
+
 }
