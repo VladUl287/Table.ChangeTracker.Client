@@ -58,8 +58,6 @@ public sealed class TrackAttribute<TContext>(
             return _actionOptions = options with
             {
                 Source = sourceId,
-                SourceOperations = sourceId is not null ? null : options.SourceOperations,
-                SourceOperationsFactory = sourceId is not null ? null : options.SourceOperationsFactory,
                 CacheControl = cacheControl,
                 Tables = tablesNames
             };
