@@ -1,7 +1,6 @@
-﻿using System.Buffers;
-using System.Buffers.Binary;
+﻿using System.Text;
+using System.Buffers;
 using System.IO.Hashing;
-using System.Text;
 
 namespace Tracker.Core.Extensions;
 
@@ -25,10 +24,7 @@ public static class TypesExtensions
 
             ArrayPool<byte>.Shared.Return(data);
 
-            Span<byte> encodedBytes = stackalloc byte[8];
-            BinaryPrimitives.WriteUInt64LittleEndian(encodedBytes, hash);
-
-            return Convert.ToBase64String(encodedBytes);
+            return hash.ToString();
         }
         else
         {
@@ -37,12 +33,7 @@ public static class TypesExtensions
             var count = Encoding.UTF8.GetBytes(typeName, data);
             data = data[..count];
 
-            var hash = XxHash64.HashToUInt64(data);
-
-            Span<byte> encodedBytes = stackalloc byte[8];
-            BinaryPrimitives.WriteUInt64LittleEndian(encodedBytes, hash);
-
-            return Convert.ToBase64String(encodedBytes);
+            return XxHash64.HashToUInt64(data).ToString();
         }
     }
 }
