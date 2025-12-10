@@ -5,15 +5,17 @@ using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 using Tracker.Core.Services.Contracts;
+using Tracker.Core.Utils;
 
 namespace Tracker.AspNet.Services;
 
-public class ETagService(
+public class RequestHandler(
     IETagGenerator etagGenerator, ISourceOperationsResolver operationsResolver, ITimestampsHasher timestampsHasher,
-    ILogger<ETagService> logger) : IETagService
+    ILogger<RequestHandler> logger) : IRequestHandler
 {
-    public async Task<bool> NotModified(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token)
+    public async Task<bool> IsNotModified(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(ctx, nameof(ctx));
         ArgumentNullException.ThrowIfNull(options, nameof(options));
@@ -42,11 +44,11 @@ public class ETagService(
         var incomingETag = ctx.Request.Headers.IfNoneMatch.Count > 0 ? ctx.Request.Headers.IfNoneMatch[0] : null;
 
         var asBuildTime = etagGenerator.AssemblyBuildTimeTicks;
-        var ltDigitCount = DigitCountLog(ltValue);
+        var ltDigitCount = UlongUtils.DigitCount(ltValue);
         var suffix = options.Suffix(ctx);
         var fullLength = asBuildTime.Length + 1 + ltDigitCount + suffix.Length + (suffix.Length > 0 ? 1 : 0);
 
-        if (incomingETag is not null && ETagEqual(incomingETag, ltValue, asBuildTime, suffix))
+        if (incomingETag is not null && ETagEqual(fullLength, incomingETag, ltValue, asBuildTime, suffix))
         {
             ctx.Response.StatusCode = StatusCodes.Status304NotModified;
             logger.LogNotModified(incomingETag);
@@ -54,17 +56,16 @@ public class ETagService(
         }
 
         ctx.Response.Headers.CacheControl = options.CacheControl;
-        var etag = BuildETag(fullLength, (asBuildTime, ltValue, suffix));
+        var etag = etagGenerator.BuildETag(fullLength, ltValue, suffix);
         ctx.Response.Headers.ETag = etag;
         logger.LogETagAdded(etag);
         return false;
     }
 
-    private static bool ETagEqual(string inETag, ulong lTimestamp, string asBuildTime, string suffix)
+    private static bool ETagEqual(int fullLength, string inETag, ulong lTimestamp, string asBuildTime, string suffix)
     {
-        var ltDigitCount = DigitCountLog(lTimestamp);
+        var ltDigitCount = UlongUtils.DigitCount(lTimestamp);
 
-        var fullLength = asBuildTime.Length + 1 + ltDigitCount + suffix.Length + (suffix.Length > 0 ? 1 : 0);
         if (fullLength != inETag.Length)
             return false;
 
@@ -75,7 +76,7 @@ public class ETagService(
             return false;
 
         var inTicks = incomingETag.Slice(++rightEdge, ltDigitCount);
-        if (!CompareStringWithLong(inTicks, lTimestamp))
+        if (!inTicks.EqualsLong(lTimestamp))
             return false;
 
         rightEdge += ltDigitCount;
@@ -87,47 +88,6 @@ public class ETagService(
             return false;
 
         return true;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool CompareStringWithLong(ReadOnlySpan<char> str, ulong number)
-    {
-        if (str.Length > 19)
-            return false;
-
-        ulong result = 0;
-        foreach (var c in str)
-        {
-            if (c < '0' || c > '9') return false;
-            result = result * 10 + (ulong)(c - '0');
-        }
-
-        return result == number;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string BuildETag(int fullLength, (string AsBuldTime, ulong LastTimestamp, string Suffix) state) =>
-        string.Create(fullLength, state, (chars, state) =>
-        {
-            var position = state.AsBuldTime.Length;
-            state.AsBuldTime.AsSpan().CopyTo(chars);
-            chars[position++] = '-';
-
-            state.LastTimestamp.TryFormat(chars[position..], out var written);
-
-            if (!string.IsNullOrEmpty(state.Suffix))
-            {
-                position += written;
-                chars[position++] = '-';
-                state.Suffix.AsSpan().CopyTo(chars[position..]);
-            }
-        });
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int DigitCountLog(ulong n)
-    {
-        if (n == 0) return 1;
-        return (int)Math.Floor(Math.Log10(n)) + 1;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

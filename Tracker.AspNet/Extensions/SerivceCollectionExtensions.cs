@@ -30,7 +30,7 @@ public static class SerivceCollectionExtensions
         });
 
         services.AddSingleton<IETagGenerator>(new ETagGenerator(Assembly.GetExecutingAssembly()));
-        services.AddSingleton<IETagService, ETagService>();
+        services.AddSingleton<IRequestHandler, RequestHandler>();
 
         services.AddSingleton<ISourceOperationsResolver, SourceOperationsResolver>();
 
@@ -67,7 +67,7 @@ public static class SerivceCollectionExtensions
         });
 
         services.AddSingleton<IETagGenerator>(new ETagGenerator(Assembly.GetExecutingAssembly()));
-        services.AddSingleton<IETagService, ETagService>();
+        services.AddSingleton<IRequestHandler, RequestHandler>();
 
         services.AddSingleton<ISourceOperationsResolver, SourceOperationsResolver>();
 

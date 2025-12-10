@@ -28,8 +28,8 @@ public abstract class TrackAttributeBase : Attribute, IAsyncActionFilter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Task<bool> NotModified(HttpContext httpCtx, ImmutableGlobalOptions options) =>
         httpCtx.RequestServices
-            .GetRequiredService<IETagService>()
-            .NotModified(httpCtx, options, httpCtx.RequestAborted);
+            .GetRequiredService<IRequestHandler>()
+            .IsNotModified(httpCtx, options, httpCtx.RequestAborted);
 
     protected abstract ImmutableGlobalOptions GetOptions(ActionExecutingContext execContext);
 }

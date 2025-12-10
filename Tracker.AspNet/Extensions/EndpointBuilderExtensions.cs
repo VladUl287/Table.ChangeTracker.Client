@@ -23,7 +23,7 @@ public static class EndpointBuilderExtensions
             var builder = provider.ApplicationServices.GetRequiredService<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
             var immutableOptions = builder.Build<TContext>(options);
 
-            var etagService = provider.ApplicationServices.GetRequiredService<IETagService>();
+            var etagService = provider.ApplicationServices.GetRequiredService<IRequestHandler>();
             var requestFilter = provider.ApplicationServices.GetRequiredService<IRequestFilter>();
 
             var filter = new TrackerEndpointFilter(etagService, requestFilter, immutableOptions);
@@ -38,7 +38,7 @@ public static class EndpointBuilderExtensions
             var builder = provider.ApplicationServices.GetRequiredService<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
             var immutableOptions = builder.Build(options);
 
-            var etagService = provider.ApplicationServices.GetRequiredService<IETagService>();
+            var etagService = provider.ApplicationServices.GetRequiredService<IRequestHandler>();
             var requestFilter = provider.ApplicationServices.GetRequiredService<IRequestFilter>();
 
             var filter = new TrackerEndpointFilter(etagService, requestFilter, immutableOptions);
