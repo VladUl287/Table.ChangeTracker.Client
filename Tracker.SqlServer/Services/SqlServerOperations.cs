@@ -57,9 +57,13 @@ public sealed class SqlServerOperations : ISourceOperations, IDisposable
         throw new InvalidOperationException($"Not able to enable tracking for table '{key}'");
     }
 
-    public Task GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token)
+    public async Task GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token)
     {
-        throw new NotImplementedException();
+        if (keys.Length > timestamps.Length)
+            throw new ArgumentException("Length timestamps array less then keys count");
+
+        for (int i = 0; i < keys.Length; i++)
+            timestamps[i] = await GetLastTimestamp(keys[i], token);
     }
 
     public Task<DateTimeOffset> GetLastTimestamp(CancellationToken token)
