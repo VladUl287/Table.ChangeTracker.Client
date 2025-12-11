@@ -18,7 +18,7 @@ public sealed class RequestHandler(
         ArgumentNullException.ThrowIfNull(ctx, nameof(ctx));
         ArgumentNullException.ThrowIfNull(options, nameof(options));
 
-        logger.LogRequestHandleStarted(ctx.TraceIdentifier);
+        logger.LogRequestHandleStarted(ctx.TraceIdentifier, ctx.Request.Path);
         try
         {
             var operationProvider = GetOperationsProvider(ctx, options, operationsResolver);
@@ -64,8 +64,10 @@ public sealed class RequestHandler(
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ISourceOperations GetOperationsProvider(
-        HttpContext ctx, ImmutableGlobalOptions opt, ISourceOperationsResolver resolver) =>
-        resolver.TryResolve(opt.Source) ?? opt.SourceOperations ?? opt.SourceOperationsFactory?.Invoke(ctx) ??
-        resolver.First ?? throw new NullReferenceException($"Source operations provider not found for request: '{ctx.Request.Path}'");
+    private static ISourceOperations GetOperationsProvider(HttpContext ctx, ImmutableGlobalOptions opt, ISourceOperationsResolver resolver) =>
+        resolver.TryResolve(opt.Source) ?? 
+        opt.SourceOperations ?? 
+        opt.SourceOperationsFactory?.Invoke(ctx) ??
+        resolver.First ?? 
+        throw new NullReferenceException($"Source operations provider not found. TraceId - '{ctx.TraceIdentifier}'");
 }
