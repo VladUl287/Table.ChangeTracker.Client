@@ -18,7 +18,7 @@ public class DefaultRequestFilterTests
     {
         _loggerMock = new Mock<ILogger<DefaultRequestFilter>>();
         _optionsMock = new Mock<ImmutableGlobalOptions>();
-        _filter = new DefaultRequestFilter(_loggerMock.Object);
+        _filter = new DefaultRequestFilter(new DefaltDirectiveChecker(), _loggerMock.Object);
         _httpContext = new DefaultHttpContext();
     }
 
