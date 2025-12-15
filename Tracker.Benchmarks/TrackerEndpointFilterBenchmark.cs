@@ -1,8 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 using System.Collections.Immutable;
 using Tracker.AspNet.Middlewares;
 using Tracker.AspNet.Models;
@@ -35,14 +33,16 @@ public class TrackerEndpointFilterBenchmark
         var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Debug);
+            builder.SetMinimumLevel(LogLevel.Error);
         });
 
+        var loggerHandler = loggerFactory.CreateLogger<DefaultRequestHandler>();
         var defaultRequestHandler = new DefaultRequestHandler(
-            etagProvider, sourceOpeationsResolver, timestampHasher, NullLogger<DefaultRequestHandler>.Instance);
+            etagProvider, sourceOpeationsResolver, timestampHasher, loggerHandler);
 
         var logger = loggerFactory.CreateLogger<DefaultRequestFilter>();
         var requestFilter = new DefaultRequestFilter(new DefaltDirectiveChecker(), logger);
+
         loggerFactory.Dispose();
 
         static Task next(HttpContext ctx) => Task.CompletedTask;
