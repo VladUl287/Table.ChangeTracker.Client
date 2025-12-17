@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Tracker.AspNet\Tracker.AspNet.csproj" />
     <ProjectReference Include="..\Tracker.Core\Tracker.Core.csproj" />
+    <ProjectReference Include="..\Tracker.Npgsql\Tracker.Npgsql.csproj" />
   </ItemGroup>
 
 </Project>

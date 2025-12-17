@@ -26,7 +26,7 @@ public abstract class TrackAttributeBase : Attribute, IAsyncActionFilter
             .RequestValid(httpCtx, options);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Task<bool> NotModified(HttpContext httpCtx, ImmutableGlobalOptions options) =>
+    private static ValueTask<bool> NotModified(HttpContext httpCtx, ImmutableGlobalOptions options) =>
         httpCtx.RequestServices
             .GetRequiredService<IRequestHandler>()
             .IsNotModified(httpCtx, options);

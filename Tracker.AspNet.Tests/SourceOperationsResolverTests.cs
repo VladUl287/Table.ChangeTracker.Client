@@ -148,7 +148,7 @@ public class SourceOperationsResolverTests
         var resolver = new SourceOperationsResolver(sourceOperations);
 
         // Act
-        var result = resolver.TryResolve("source2");
+        resolver.TryResolve("source2", out var result);
 
         // Assert
         Assert.NotNull(result);
@@ -170,7 +170,7 @@ public class SourceOperationsResolverTests
         var resolver = new SourceOperationsResolver(sourceOperations);
 
         // Act
-        var result = resolver.TryResolve("first");
+        resolver.TryResolve("first", out var result);
 
         // Assert
         Assert.NotNull(result);
@@ -189,7 +189,7 @@ public class SourceOperationsResolverTests
         var resolver = new SourceOperationsResolver(sourceOperations);
 
         // Act
-        var result = resolver.TryResolve(null);
+        resolver.TryResolve(null, out var result);
 
         // Assert
         Assert.Null(result);
@@ -207,7 +207,7 @@ public class SourceOperationsResolverTests
         var resolver = new SourceOperationsResolver(sourceOperations);
 
         // Act
-        var result = resolver.TryResolve("");
+        resolver.TryResolve("", out var result);
 
         // Assert
         Assert.Null(result);
@@ -225,7 +225,7 @@ public class SourceOperationsResolverTests
         var resolver = new SourceOperationsResolver(sourceOperations);
 
         // Act
-        var result = resolver.TryResolve("unknown");
+        resolver.TryResolve("unknown", out var result);
 
         // Assert
         Assert.Null(result);

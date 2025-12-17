@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using Microsoft.Extensions.ObjectPool;
+using Npgsql;
 using NpgsqlTypes;
 using System.Collections.Immutable;
 using System.Data;
@@ -11,6 +12,12 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
     private readonly string _sourceId;
     private readonly NpgsqlDataSource _dataSource;
     private bool _disposed;
+
+    private static readonly ObjectPool<NpgsqlParameter> _tableParamsPool =
+        ObjectPool.Create(new ParameterObjectPolicy("table_name", NpgsqlDbType.Text));
+
+    private static readonly ObjectPool<NpgsqlParameter> _timestampParamsPool =
+        ObjectPool.Create(new ParameterObjectPolicy("timestamp", NpgsqlDbType.TimestampTz));
 
     public NpgsqlOperations(string sourceId, NpgsqlDataSource dataSource)
     {
@@ -32,76 +39,107 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
 
     public string SourceId => _sourceId;
 
-    public async Task<bool> EnableTracking(string key, CancellationToken token)
+    public ValueTask<bool> EnableTracking(string key, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
 
-        const string tableName = "@table_name";
-        const string query = $"SELECT enable_table_tracking({tableName});";
+        const string EnableTableTracking = "SELECT enable_table_tracking(@table_name);";
 
-        await using var command = _dataSource.CreateCommand(query);
-        command.Parameters.AddWithValue(tableName, key);
+        using var command = _dataSource.CreateCommand(EnableTableTracking);
 
-        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
-        if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<bool>(0, token);
+        var parameter = _tableParamsPool.Get();
+        parameter.Value = key;
+        command.Parameters.Add(parameter);
 
-        throw new InvalidOperationException($"Not able to enable tracking for table '{key}'");
+        try
+        {
+            using var reader = command.ExecuteReader(CommandBehavior.SingleRow);
+            var enabled = reader.Read() && reader.GetFieldValue<bool>(0);
+            return new ValueTask<bool>(enabled);
+        }
+        finally
+        {
+            _tableParamsPool.Return(parameter);
+        }
     }
-    public async Task<bool> DisableTracking(string key, CancellationToken token)
+    public ValueTask<bool> DisableTracking(string key, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
 
-        const string tableName = "@table_name";
-        const string query = $"SELECT disable_table_tracking({tableName});";
+        const string DisableTableQuery = "SELECT disable_table_tracking(@table_name);";
+        using var command = _dataSource.CreateCommand(DisableTableQuery);
 
-        await using var command = _dataSource.CreateCommand(query);
-        command.Parameters.AddWithValue(tableName, key);
+        var parameter = _tableParamsPool.Get();
+        parameter.Value = key;
+        command.Parameters.Add(parameter);
 
-        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
-        if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<bool>(0, token);
+        try
+        {
+            using var reader = command.ExecuteReader(CommandBehavior.SingleRow);
+            var disabled = reader.Read() && reader.GetFieldValue<bool>(0);
+            return new ValueTask<bool>(disabled);
+        }
+        finally
+        {
+            _tableParamsPool.Return(parameter);
+        }
 
-        throw new InvalidOperationException($"Not able to disable tracking for table '{key}'");
     }
 
-    public async Task<bool> IsTracking(string key, CancellationToken token)
+    public ValueTask<bool> IsTracking(string key, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
 
-        const string tableName = "@table_name";
-        const string query = $"SELECT is_table_tracked({tableName});";
+        const string IsTrackingQuery = "SELECT is_table_tracked(@table_name);";
 
-        await using var command = _dataSource.CreateCommand(query);
-        command.Parameters.AddWithValue(tableName, key);
+        using var command = _dataSource.CreateCommand(IsTrackingQuery);
 
-        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
-        if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<bool>(0, token);
+        var parameter = _tableParamsPool.Get();
+        parameter.Value = key;
+        command.Parameters.Add(parameter);
 
-        throw new InvalidOperationException($"Not able to detect tracking for table '{key}'");
+        try
+        {
+            using var reader = command.ExecuteReader(CommandBehavior.SingleRow);
+            var tracking = reader.Read() && reader.GetFieldValue<bool>(0);
+            return new ValueTask<bool>(tracking);
+        }
+        finally
+        {
+            _tableParamsPool.Return(parameter);
+        }
     }
 
-    public async Task<DateTimeOffset> GetLastTimestamp(string key, CancellationToken token)
+    public ValueTask<DateTimeOffset> GetLastTimestamp(string key, CancellationToken token = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
+        const string GetTimestampQuery = "SELECT get_last_timestamp(@table_name);";
+        using var command = _dataSource.CreateCommand(GetTimestampQuery);
 
-        const string getTimestampQuery = "SELECT get_last_timestamp(@table_name);";
-        await using var command = _dataSource.CreateCommand(getTimestampQuery);
+        var parameter = _tableParamsPool.Get();
+        parameter.Value = key;
+        command.Parameters.Add(parameter);
 
-        const string tableNameParam = "table_name";
-        command.Parameters.AddWithValue(tableNameParam, key);
+        try
+        {
+            using var reader = command.ExecuteReader(CommandBehavior.SingleRow);
 
-        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
+            if (reader.Read())
+            {
+                var timestamp = reader.GetFieldValue<DateTimeOffset?>(0)
+                   ?? throw new NullReferenceException($"Not able to resolve timestamp for table '{key}'");
 
-        if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<DateTimeOffset?>(0, token)
-                ?? throw new NullReferenceException($"Not able to resolve timestamp for table '{key}'");
+                return new ValueTask<DateTimeOffset>(timestamp);
+            }
 
-        throw new InvalidOperationException($"Not able to resolve timestamp for table '{key}'");
+            throw new InvalidOperationException($"Not able to resolve timestamp for table '{key}'");
+        }
+        finally
+        {
+            _tableParamsPool.Return(parameter);
+        }
     }
 
-    public async Task GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token)
+    public async ValueTask GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token = default)
     {
         if (keys.Length > timestamps.Length)
             throw new ArgumentException("Length timestamps array less then keys count");
@@ -110,41 +148,45 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
             timestamps[i] = await GetLastTimestamp(keys[i], token);
     }
 
-    public async Task<DateTimeOffset> GetLastTimestamp(CancellationToken token)
+    public ValueTask<DateTimeOffset> GetLastTimestamp(CancellationToken token = default)
     {
-        const string getTimestampQuery = "SELECT pg_last_committed_xact();";
-        await using var command = _dataSource.CreateCommand(getTimestampQuery);
+        const string GetTimestampQuery = "SELECT pg_last_committed_xact();";
+        using var command = _dataSource.CreateCommand(GetTimestampQuery);
 
-        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
-
-        if (await reader.ReadAsync(token))
+        using var reader = command.ExecuteReader(CommandBehavior.SingleRow);
+        if (reader.Read())
         {
-            var result = await reader.GetFieldValueAsync<object[]?>(0, token);
+            var result = reader.GetFieldValue<object[]?>(0);
             if (result is { Length: > 0 })
-            {
-                return (DateTime)result[1];
-            }
-            return default;
+                return new ValueTask<DateTimeOffset>((DateTime)result[1]);
         }
         throw new InvalidOperationException("Not able to resolve pg_last_committed_xact");
     }
 
-    public async Task<bool> SetLastTimestamp(string key, DateTimeOffset value, CancellationToken token)
+    public ValueTask<bool> SetLastTimestamp(string key, DateTimeOffset value, CancellationToken token = default)
     {
-        const string setTimestampQuery = $"SELECT set_last_timestamp(@table_name, @timestamp);";
-        await using var command = _dataSource.CreateCommand(setTimestampQuery);
+        const string SetTimestampQuery = $"SELECT set_last_timestamp(@table_name, @timestamp);";
+        using var command = _dataSource.CreateCommand(SetTimestampQuery);
 
-        const string tableParam = "table_name";
-        const string timestampParam = "timestamp";
-        command.Parameters.AddWithValue(tableParam, NpgsqlDbType.Text, key);
-        command.Parameters.AddWithValue(timestampParam, NpgsqlDbType.TimestampTz, value);
+        var tableParameter = _tableParamsPool.Get();
+        tableParameter.Value = key;
+        command.Parameters.Add(tableParameter);
 
-        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
+        var timestampParameter = _timestampParamsPool.Get();
+        timestampParameter.Value = value;
+        command.Parameters.Add(timestampParameter);
 
-        if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<bool>(0, token);
+        try
+        {
+            using var reader = command.ExecuteReader(CommandBehavior.SingleRow);
 
-        throw new InvalidOperationException($"Not able to set timestamp for table '{key}'");
+            var setted = reader.Read() && reader.GetFieldValue<bool>(0);
+            return new ValueTask<bool>(setted);
+        }
+        finally
+        {
+            _tableParamsPool.Return(tableParameter);
+        }
     }
 
     public void Dispose()
@@ -167,5 +209,20 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
     ~NpgsqlOperations()
     {
         Dispose(disposing: false);
+    }
+
+    private sealed class ParameterObjectPolicy(string parameterName, NpgsqlDbType dbType) : IPooledObjectPolicy<NpgsqlParameter>
+    {
+        public NpgsqlParameter Create() => new(parameterName, dbType);
+
+        public bool Return(NpgsqlParameter obj)
+        {
+            if (obj is null) return false;
+
+            obj.Value = DBNull.Value;
+            obj.Collection = null;
+
+            return true;
+        }
     }
 }

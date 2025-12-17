@@ -20,5 +20,5 @@ public interface IRequestHandler
     /// A task that represents the asynchronous operation. The task result is <c>true</c>
     /// if the request content has not been modified and a 304 status was set; otherwise, <c>false</c>.
     /// </returns>
-    Task<bool> IsNotModified(HttpContext context, ImmutableGlobalOptions options);
+    ValueTask<bool> IsNotModified(HttpContext context, ImmutableGlobalOptions options, CancellationToken token = default);
 }

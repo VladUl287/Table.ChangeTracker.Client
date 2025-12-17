@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
@@ -16,7 +17,7 @@ public sealed class DefaultRequestHandler(
     IETagProvider eTagService, ISourceOperationsResolver operationsResolver, ITimestampsHasher timestampsHasher,
     ILogger<DefaultRequestHandler> logger) : IRequestHandler
 {
-    public async Task<bool> IsNotModified(HttpContext ctx, ImmutableGlobalOptions options)
+    public async ValueTask<bool> IsNotModified(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(ctx, nameof(ctx));
         ArgumentNullException.ThrowIfNull(options, nameof(options));
@@ -53,7 +54,7 @@ public sealed class DefaultRequestHandler(
         }
     }
 
-    private async Task<ulong> GetLastTimestampAsync(ImmutableGlobalOptions options, ISourceOperations sourceOperations)
+    private async ValueTask<ulong> GetLastTimestampAsync(ImmutableGlobalOptions options, ISourceOperations sourceOperations)
     {
         switch (options.Tables.Length)
         {

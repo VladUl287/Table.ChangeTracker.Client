@@ -87,40 +87,40 @@ public class TrackerEndpointFilterBenchmark
     {
         public string SourceId => string.Empty;
 
-        public Task<bool> DisableTracking(string key, CancellationToken token)
+        public ValueTask<bool> DisableTracking(string key, CancellationToken token)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> EnableTracking(string key, CancellationToken token)
+        public ValueTask<bool> EnableTracking(string key, CancellationToken token)
         {
             throw new NotImplementedException();
         }
 
         private static readonly DateTimeOffset _timestamp = DateTimeOffset.Parse("2023-01-01");
 
-        public Task<DateTimeOffset> GetLastTimestamp(string key, CancellationToken token)
+        public ValueTask<DateTimeOffset> GetLastTimestamp(string key, CancellationToken token)
         {
-            return Task.FromResult(_timestamp);
+            return ValueTask.FromResult(_timestamp);
         }
 
-        public Task<DateTimeOffset> GetLastTimestamp(CancellationToken token)
+        public ValueTask<DateTimeOffset> GetLastTimestamp(CancellationToken token)
         {
-            return Task.FromResult(_timestamp);
+            return ValueTask.FromResult(_timestamp);
         }
 
-        public Task GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token)
+        public ValueTask GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token)
         {
             timestamps[0] = _timestamp;
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
-        public Task<bool> IsTracking(string key, CancellationToken token)
+        public ValueTask<bool> IsTracking(string key, CancellationToken token)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetLastTimestamp(string key, DateTimeOffset value, CancellationToken token)
+        public ValueTask<bool> SetLastTimestamp(string key, DateTimeOffset value, CancellationToken token)
         {
             throw new NotImplementedException();
         }
