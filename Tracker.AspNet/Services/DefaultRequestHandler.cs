@@ -29,7 +29,7 @@ public sealed class DefaultRequestHandler(
             var operationProvider = GetOperationsProvider(ctx, options);
             logger.LogSourceProviderResolved(traceId, operationProvider.SourceId);
 
-            var lastTimestamp = await GetLastTimestampAsync(options, operationProvider);
+            var lastTimestamp = await GetLastVersionAsync(options, operationProvider);
 
             var ifNoneMatch = ctx.Request.Headers.IfNoneMatch.Count > 0 ? ctx.Request.Headers.IfNoneMatch[0] : null;
 
@@ -53,7 +53,7 @@ public sealed class DefaultRequestHandler(
         }
     }
 
-    private async ValueTask<ulong> GetLastTimestampAsync(ImmutableGlobalOptions options, ISourceOperations sourceOperations)
+    private async ValueTask<ulong> GetLastVersionAsync(ImmutableGlobalOptions options, ISourceOperations sourceOperations)
     {
         switch (options.Tables.Length)
         {
