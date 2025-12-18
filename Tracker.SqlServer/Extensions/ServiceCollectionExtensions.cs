@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
         return services.AddSingleton<ISourceOperations>((_) =>
-            new SqlServerIndexUsageStatsOperations(sourceId, connectionString)
+            new SqlServerIndexUsageOperations(sourceId, connectionString)
         );
     }
 
@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
             var sourceIdGenerator = scope.ServiceProvider.GetRequiredService<ISourceIdGenerator>();
             var sourceId = sourceIdGenerator.GenerateId<TContext>();
 
-            return new SqlServerIndexUsageStatsOperations(sourceId, connectionString);
+            return new SqlServerIndexUsageOperations(sourceId, connectionString);
         });
     }
 
@@ -48,7 +48,7 @@ public static class ServiceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
-            return new SqlServerIndexUsageStatsOperations(sourceId, connectionString);
+            return new SqlServerIndexUsageOperations(sourceId, connectionString);
         });
     }
 }
