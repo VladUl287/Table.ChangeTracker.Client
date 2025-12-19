@@ -1,8 +1,8 @@
 ﻿using BenchmarkDotNet.Running;
 using Tracker.Benchmarks;
 
-//BenchmarkRunner.Run<NpgsqlOperationBenchmark>();
-//return;
+BenchmarkRunner.Run<NpgsqlOperationBenchmark>();
+return;
 
 //BenchmarkRunner.Run<TrackerMiddlewareFlterBenchmark>();
 //return;
@@ -13,4 +13,4 @@ using Tracker.Benchmarks;
 //BenchmarkRunner.Run<ReferenceEqualVsManuallStringCompare>();
 //return;
 
-BenchmarkRunner.Run<ETagComparerBenchmark>();
+//BenchmarkRunner.Run<ETagComparerBenchmark>();

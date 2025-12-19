@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Data;
 using Tracker.Core.Services.Contracts;
+using Tracker.Npgsql.Extensions;
 
 namespace Tracker.Npgsql.Services;
 
@@ -83,12 +84,8 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
 
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
         if (await reader.ReadAsync(token))
-        {
-            var timestamp = await reader.GetFieldValueAsync<DateTimeOffset?>(0, token)
-               ?? throw new NullReferenceException($"Not able to resolve timestamp for table '{key}'");
+            return reader.GetTimestampTicks(0);
 
-            return timestamp.Ticks;
-        }
         throw new InvalidOperationException($"Not able to resolve timestamp for table '{key}'");
     }
 
@@ -96,14 +93,18 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
     {
         const string GetTimestampQuery = "SELECT get_last_timestamps(@table_name);";
         using var command = _dataSource.CreateCommand(GetTimestampQuery);
-        command.Parameters.AddWithValue(TABLE_NAME_PARAM, NpgsqlTypes.NpgsqlDbType.Array, keys);
+        command.Parameters.AddWithValue(TABLE_NAME_PARAM, NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text, keys);
 
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
         if (await reader.ReadAsync(token))
         {
-            var timestamps = await reader.GetFieldValueAsync<DateTimeOffset[]>(0);
+            var timestamps = await reader.GetFieldValueAsync<DateTimeOffset?[]>(0);
             for (int i = 0; i < timestamps.Length; i++)
-                versions[i] = timestamps[i].Ticks;
+            {
+                var timestamp = timestamps[i]
+                    ?? throw new NullReferenceException($"Not able to resolve timestamp for table '{keys[i]}'");
+                versions[i] = timestamp.Ticks;
+            }
             return;
         }
 
@@ -117,12 +118,8 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
 
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
         if (await reader.ReadAsync(token))
-        {
-            var timestamp = await reader.GetFieldValueAsync<DateTimeOffset?>(0, token)
-               ?? throw new NullReferenceException("Not able to resolve pg_last_committed_xact timestamp");
+            return reader.GetTimestampTicks(0);
 
-            return timestamp.Ticks;
-        }
         throw new InvalidOperationException("Not able to resolve pg_last_committed_xact timestamp");
     }
 
