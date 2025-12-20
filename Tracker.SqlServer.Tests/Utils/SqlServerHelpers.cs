@@ -145,6 +145,21 @@ internal static class SqlServerHelpers
         await command.ExecuteNonQueryAsync();
     }
 
+    internal static async Task CreateTestTableWithNoKey(string connectionString, string tableName)
+    {
+        using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+
+        var createQuery = $@"
+            CREATE TABLE [{tableName}] (
+                Id INT NOT NULL,
+                Name NVARCHAR(100) NOT NULL
+            )";
+
+        using var command = new SqlCommand(createQuery, connection);
+        await command.ExecuteNonQueryAsync();
+    }
+
     internal static async Task InsertToTestTable(string connectionString, string table, int value)
     {
         using var connection = new SqlConnection(connectionString);
