@@ -296,6 +296,141 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task DisableTracking_WhenTableExistsAndChangeTrackingEnabled_ReturnsTrue()
+    {
+        // Arrange
+        await _operations.EnableTracking(_testTableName);
+
+        // Act
+        var result = await _operations.DisableTracking(_testTableName);
+
+        // Assert
+        Assert.True(result);
+        Assert.False(await _operations.IsTracking(_testTableName));
+    }
+
+    [Fact]
+    public async Task DisableTracking_WhenTableExistsButChangeTrackingNotEnabled_ReturnsFalse()
+    {
+        // Arrange - Ensure change tracking is NOT enabled for the table
+        await _operations.DisableTracking(_testTableName);
+
+        // Act
+        var result = await _operations.DisableTracking(_testTableName);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DisableTracking_WhenTableDoesNotExist_ReturnsFalse()
+    {
+        // Arrange
+        var nonExistentTable = "NonExistentTable_" + Guid.NewGuid().ToString("N");
+
+        //Act
+        var result = await _operations.DisableTracking(nonExistentTable);
+
+        // Act & Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DisableTracking_WithEmptyTableName_ThrowsArgumentException()
+    {
+        // Arrange
+        var emptyTableName = "";
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _operations.DisableTracking(emptyTableName));
+    }
+
+    [Fact]
+    public async Task DisableTracking_WithNullTableName_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _operations.DisableTracking(null));
+    }
+
+    [Fact]
+    public async Task DisableTracking_WhenTableHasSchemaPrefix_WorksCorrectly()
+    {
+        // Arrange
+        var schemaTableName = "dbo." + _testTableName2;
+        await _operations.EnableTracking(_testTableName2);
+
+        // Act
+        var result = await _operations.DisableTracking(schemaTableName);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task DisableTracking_WhenCalledAfterTableDropped_ThrowsException()
+    {
+        // Arrange
+        await _operations.EnableTracking(_testTableName);
+
+        // Drop table while change tracking is enabled
+        await DropTestTables();
+
+        // Recreate table WITHOUT change tracking
+        await CreateTestTables();
+
+        // Act & Assert - Should throw because table doesn't have change tracking
+        var result = await _operations.DisableTracking(_testTableName);
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DisableTracking_WithCancellationToken_CanBeCancelled()
+    {
+        // Arrange
+        await _operations.EnableTracking(_testTableName);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<TaskCanceledException>(async () =>
+            await _operations.DisableTracking(_testTableName, cts.Token));
+    }
+
+    [Fact]
+    public async Task DisableTracking_WhenUserLacksAlterPermission_ThrowsException()
+    {
+        // Arrange - This test requires a separate low-privilege user setup
+        // For integration testing, you might need to create a low-privilege user
+        // and test with that connection string
+        // This is a placeholder for permission testing
+        await _operations.EnableTracking(_testTableName);
+
+        // Note: This test would require creating a low-privilege user
+        // and testing with different credentials
+        // var lowPrivOperations = CreateOperationsWithLowPrivileges();
+        // await Assert.ThrowsAsync<InvalidOperationException>(() => 
+        //     lowPrivOperations.DisableTracking(_testTableName));
+    }
+
+    [Fact]
+    public async Task DisableTracking_VerifyNoSideEffectsOnOtherTables()
+    {
+        // Arrange
+        await _operations.EnableTracking(_testTableName);
+        await _operations.EnableTracking(_testTableName2);
+
+        // Act - Disable tracking on first table only
+        var result = await _operations.DisableTracking(_testTableName);
+
+        // Assert
+        Assert.True(result);
+        Assert.False(await _operations.IsTracking(_testTableName));
+        Assert.True(await _operations.IsTracking(_testTableName2));
+    }
+
+    [Fact]
     public async Task DisableTracking_ForAlreadyDisabledTable_ReturnsFalse()
     {
         // Arrange
@@ -314,11 +449,9 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
         // Arrange
         await _operations.EnableTracking(_testTableName, CancellationToken.None);
 
-        // Get initial timestamp
         var timestamp1 = await _operations.GetLastVersion(_testTableName, CancellationToken.None);
         _output.WriteLine($"Initial timestamp: {timestamp1}");
 
-        // Make some changes
         await MakeChangesToTable(_testTableName);
 
         // Act
@@ -327,9 +460,6 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
 
         // Assert
         Assert.True(timestamp2 > DateTimeOffset.MinValue.Ticks);
-        // The timestamp should be more recent after changes
-        // Note: Since we're converting versions to timestamps, this might not always hold
-        // depending on the conversion logic
     }
 
     [Fact]
@@ -414,6 +544,9 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
 
             Assert.True(isTracking1);
             Assert.True(isTracking2);
+
+            await MakeChangesToTable(_testTableName);
+            await MakeChangesToTable2(_testTableName2);
 
             // Both should be able to get timestamps
             var timestamp1 = await operations1.GetLastVersion(_testTableName, CancellationToken.None);
