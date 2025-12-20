@@ -11,7 +11,9 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
     private readonly ITestOutputHelper _output;
     private readonly string _connectionString;
     private DbDataSource _dataSource;
+    private DbDataSource _dataSourceLowPrivilage;
     private SqlServerChangeTrackingOperations _operations;
+    private SqlServerChangeTrackingOperations _lowPrivilageOperations;
     private readonly string _testTableName = $"TestTable_{Guid.NewGuid():N}";
     private readonly string _testTableName2 = $"TestTable2_{Guid.NewGuid():N}";
 
@@ -24,7 +26,9 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _dataSource = SqlClientFactory.Instance.CreateDataSource(_connectionString);
+        _dataSourceLowPrivilage = SqlClientFactory.Instance.CreateDataSource(TestConfiguration.GetLowPrivilageConnectionString());
         _operations = new SqlServerChangeTrackingOperations("test-source", _dataSource);
+        _lowPrivilageOperations = new SqlServerChangeTrackingOperations("test-source-low-privilage", _dataSourceLowPrivilage);
 
         // Ensure change tracking is enabled at database level
         await EnableDatabaseChangeTracking();
@@ -399,19 +403,13 @@ public class SqlServerChangeTrackingOperationsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DisableTracking_WhenUserLacksAlterPermission_ThrowsException()
+    public async Task DisableTracking_WhenUserLacksAlterPermission_ReturnFalse()
     {
-        // Arrange - This test requires a separate low-privilege user setup
-        // For integration testing, you might need to create a low-privilege user
-        // and test with that connection string
-        // This is a placeholder for permission testing
         await _operations.EnableTracking(_testTableName);
 
-        // Note: This test would require creating a low-privilege user
-        // and testing with different credentials
-        // var lowPrivOperations = CreateOperationsWithLowPrivileges();
-        // await Assert.ThrowsAsync<InvalidOperationException>(() => 
-        //     lowPrivOperations.DisableTracking(_testTableName));
+        var result = await _lowPrivilageOperations.DisableTracking(_testTableName);
+
+        Assert.False(result);
     }
 
     [Fact]
@@ -629,5 +627,10 @@ public static class TestConfiguration
     public static string GetConnectionString()
     {
         return "Data Source=localhost,1433;User ID=sa;Password=Password1;Database=TrackerTestDb;TrustServerCertificate=True;";
+    }
+
+    public static string GetLowPrivilageConnectionString()
+    {
+        return "Data Source=localhost,1433;User ID=lowprivilege;Password=Password1;Database=TrackerTestDb;TrustServerCertificate=True;";
     }
 }
