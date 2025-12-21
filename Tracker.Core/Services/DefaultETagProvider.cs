@@ -23,9 +23,6 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
         if (!assemblyTimestampSegment.Equals(_assemblyTimestamp.AsSpan(), StringComparison.Ordinal))
             return false;
 
-        if (etagSpan[position] != '-')
-            return false;
-
         var timestampSegment = etagSpan.Slice(++position, timestampDigitCount);
         if (!timestampSegment.EqualsULong(lastTimestamp))
             return false;
@@ -34,9 +31,6 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
 
         if (position == etagSpan.Length)
             return suffix.Length == 0;
-
-        if (etagSpan[position] != '-')
-            return false;
 
         var suffixSegment = etagSpan[++position..];
         return suffixSegment.Equals(suffix, StringComparison.Ordinal);
