@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
@@ -37,8 +38,8 @@ public sealed class TrackAttribute(
 
             _actionOptions = options with
             {
+                Tables = ResolveTables(tables, options),
                 CacheControl = cacheControl ?? options.CacheControl,
-                Tables = tables?.ToImmutableArray() ?? options.Tables,
                 SourceProvider = providerSelector.SelectProvider(sourceId, options),
             };
 
@@ -46,4 +47,8 @@ public sealed class TrackAttribute(
             return _actionOptions;
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ImmutableArray<string> ResolveTables(string[]? tables, ImmutableGlobalOptions options) =>
+        tables?.ToImmutableArray() ?? options.Tables;
 }
