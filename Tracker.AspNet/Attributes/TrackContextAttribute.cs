@@ -48,7 +48,7 @@ public sealed class TrackAttribute<TContext>(
             _actionOptions = options with
             {
                 CacheControl = cacheControl,
-                SourceOperations = sourceOperations,
+                SourceProvider = sourceOperations,
                 Tables = GetAndCombineTablesNames(ctx, tables, entities, serviceProvider, logger)
             };
             logger.LogOptionsBuilded(GetActionName(ctx));

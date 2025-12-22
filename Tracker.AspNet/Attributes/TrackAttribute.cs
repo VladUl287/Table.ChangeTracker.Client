@@ -35,7 +35,7 @@ public sealed class TrackAttribute(
             var operationsProvider = providerSelector.SelectProvider(sourceId, options);
             _actionOptions = options with
             {
-                SourceOperations = operationsProvider,
+                SourceProvider = operationsProvider,
                 CacheControl = cacheControl ?? options.CacheControl,
                 Tables = tables?.ToImmutableArray() ?? []
             };

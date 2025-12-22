@@ -24,8 +24,8 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
 
         return new ImmutableGlobalOptions
         {
-            SourceOperations = providerSelector.SelectProvider(options),
-            SourceOperationsFactory = options.SourceOperationsFactory,
+            SourceProvider = providerSelector.SelectProvider(options),
+            SourceProviderFactory = options.SourceProviderFactory,
 
             Suffix = options.Suffix,
             Filter = options.Filter,
@@ -49,8 +49,8 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
 
         return new ImmutableGlobalOptions
         {
-            SourceOperations = providerSelector.SelectProvider<TContext>(options),
-            SourceOperationsFactory = options.SourceOperationsFactory,
+            SourceProvider = providerSelector.SelectProvider<TContext>(options),
+            SourceProviderFactory = options.SourceProviderFactory,
 
             Tables = tables,
             Suffix = options.Suffix,
