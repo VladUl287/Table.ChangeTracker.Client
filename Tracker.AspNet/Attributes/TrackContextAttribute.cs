@@ -8,7 +8,6 @@ using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 using Tracker.Core.Extensions;
-using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Attributes;
 
@@ -34,31 +33,25 @@ public sealed class TrackAttribute<TContext>(
 
             var scopeFactory = ctx.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
-            var serviceProvider = scope.ServiceProvider;
 
+            var serviceProvider = scope.ServiceProvider;
             var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
             var sourceResolver = serviceProvider.GetRequiredService<IProviderResolver>();
-            var sourceIdGenerator = serviceProvider.GetRequiredService<IProviderIdGenerator>();
             var logger = serviceProvider.GetRequiredService<ILogger<TrackAttribute<TContext>>>();
 
             var sourceOperations = sourceResolver.SelectProvider<TContext>(sourceId, options);
 
-            cacheControl ??= options.CacheControl;
-
             _actionOptions = options with
             {
-                CacheControl = cacheControl,
                 SourceProvider = sourceOperations,
+                CacheControl = cacheControl ?? options.CacheControl,
                 Tables = GetAndCombineTablesNames(ctx, tables, entities, serviceProvider, logger)
             };
+
             logger.LogOptionsBuilded(GetActionName(ctx));
             return _actionOptions;
         }
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string GetActionName(ActionExecutingContext ctx) =>
-        ctx.ActionDescriptor.DisplayName ?? ctx.ActionDescriptor.Id;
 
     private static ImmutableArray<string> GetAndCombineTablesNames(ActionExecutingContext ctx,
         string[]? tables, Type[]? entities, IServiceProvider serviceProvider, ILogger<TrackAttribute<TContext>> logger)

@@ -27,18 +27,23 @@ public sealed class TrackAttribute(
             if (_actionOptions is not null)
                 return _actionOptions;
 
-            var serviceProvider = ctx.HttpContext.RequestServices;
+            var scopeFactory = ctx.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+            using var scope = scopeFactory.CreateScope();
+
+            var serviceProvider = scope.ServiceProvider;
             var providerSelector = serviceProvider.GetRequiredService<IProviderResolver>();
             var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
             var logger = serviceProvider.GetRequiredService<ILogger<TrackAttribute>>();
 
             var operationsProvider = providerSelector.SelectProvider(sourceId, options);
+
             _actionOptions = options with
             {
                 SourceProvider = operationsProvider,
                 CacheControl = cacheControl ?? options.CacheControl,
                 Tables = tables?.ToImmutableArray() ?? []
             };
+
             logger.LogOptionsBuilded(ctx.ActionDescriptor.DisplayName ?? ctx.ActionDescriptor.Id);
             return _actionOptions;
         }
