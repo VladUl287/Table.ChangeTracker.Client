@@ -5,7 +5,7 @@ namespace Tracker.Core.Services.Contracts;
 /// <summary>
 /// Defines operations for managing source data tracking and versions management.
 /// </summary>
-public interface ISourceProvider
+public interface ISourceProvider : IDisposable
 {
     /// <summary>
     /// Gets the unique identifier for the source.

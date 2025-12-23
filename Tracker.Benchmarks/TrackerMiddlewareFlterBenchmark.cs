@@ -91,6 +91,11 @@ public class TrackerMiddlewareFlterBenchmark
             throw new NotImplementedException();
         }
 
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
         public ValueTask<bool> EnableTracking(string key, CancellationToken token = default)
         {
             throw new NotImplementedException();

@@ -6,7 +6,7 @@ using Tracker.Npgsql.Extensions;
 
 namespace Tracker.Npgsql.Services;
 
-public sealed class NpgsqlOperations : ISourceProvider, IDisposable
+public sealed class NpgsqlOperations : ISourceProvider
 {
     private readonly string _sourceId;
     private readonly NpgsqlDataSource _dataSource;

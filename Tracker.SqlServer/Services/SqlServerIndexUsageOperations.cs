@@ -6,7 +6,7 @@ using Tracker.Core.Services.Contracts;
 
 namespace Tracker.SqlServer.Services;
 
-public sealed class SqlServerIndexUsageOperations : ISourceProvider, IDisposable
+public sealed class SqlServerIndexUsageOperations : ISourceProvider
 {
     private readonly string _sourceId;
     private readonly DbDataSource _dataSource;
