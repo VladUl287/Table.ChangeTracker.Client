@@ -19,13 +19,12 @@ public sealed class DefaultRequestHandler(
         var traceId = new TraceId(ctx);
 
         logger.LogRequestHandleStarted(traceId, ctx.Request.Path);
+        var operationsProvider =
+            options.SourceProvider ??
+            options.SourceProviderFactory?.Invoke(ctx) ??
+            throw new NullReferenceException($"Source operations provider not found. TraceId = {traceId}");
         try
         {
-            var operationsProvider =
-                options.SourceProvider ??
-                options.SourceProviderFactory?.Invoke(ctx) ??
-                throw new NullReferenceException($"Source operations provider not found. TraceId = {traceId}");
-
             logger.LogSourceProviderResolved(traceId, operationsProvider.Id);
 
             var lastTimestamp = await GetLastVersionAsync(options, operationsProvider, token);
@@ -42,6 +41,9 @@ public sealed class DefaultRequestHandler(
         }
         finally
         {
+            if (options.SourceProvider is null)
+                operationsProvider?.Dispose();
+
             logger.LogRequestHandleFinished(traceId);
         }
     }
