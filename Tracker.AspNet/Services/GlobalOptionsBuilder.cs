@@ -7,7 +7,6 @@ using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Utils;
 using Tracker.Core.Extensions;
-using Tracker.Core.Services.Contracts;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
@@ -24,7 +23,8 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
 
         return new ImmutableGlobalOptions
         {
-            SourceProvider = providerSelector.SelectProvider(options),
+            Source = options.Source,
+            SourceProvider = options.SourceProvider,
             SourceProviderFactory = options.SourceProviderFactory,
 
             Suffix = options.Suffix,
@@ -41,15 +41,14 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
         using var scope = scopeFactory.CreateScope();
 
         var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
-        var sourceIdGenerator = scope.ServiceProvider.GetRequiredService<IProviderIdGenerator>();
-        var providerSelector = scope.ServiceProvider.GetRequiredService<IProviderResolver>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<GlobalOptionsBuilder>>();
 
         var tables = GetAndCombineTablesNames(options, dbContext, logger);
 
         return new ImmutableGlobalOptions
         {
-            SourceProvider = providerSelector.SelectProvider<TContext>(options),
+            Source = options.Source,
+            SourceProvider = options.SourceProvider,
             SourceProviderFactory = options.SourceProviderFactory,
 
             Tables = tables,

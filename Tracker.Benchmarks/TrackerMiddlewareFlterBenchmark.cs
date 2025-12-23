@@ -36,8 +36,8 @@ public class TrackerMiddlewareFlterBenchmark
         });
 
         var loggerHandler = loggerFactory.CreateLogger<DefaultRequestHandler>();
-        var defaultRequestHandler = new DefaultRequestHandler(
-            etagProvider, timestampHasher, loggerHandler);
+        //var defaultRequestHandler = new DefaultRequestHandler(
+        //    etagProvider, timestampHasher, loggerHandler);
 
         var logger = loggerFactory.CreateLogger<DefaultRequestFilter>();
         var requestFilter = new DefaultRequestFilter(logger);
@@ -46,7 +46,7 @@ public class TrackerMiddlewareFlterBenchmark
 
         static Task next(HttpContext ctx) => Task.CompletedTask;
 
-        trackerMiddleware = new(next, requestFilter, defaultRequestHandler, emptyGlobalOptions);
+        //trackerMiddleware = new(next, requestFilter, defaultRequestHandler, emptyGlobalOptions);
 
         httpContext = new DefaultHttpContext();
         httpContext.Request.Method = HttpMethods.Get;

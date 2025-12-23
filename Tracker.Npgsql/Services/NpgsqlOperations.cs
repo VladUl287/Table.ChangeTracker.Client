@@ -8,19 +8,19 @@ namespace Tracker.Npgsql.Services;
 
 public sealed class NpgsqlOperations : ISourceProvider
 {
-    private readonly string _sourceId;
+    private readonly string _providerId;
     private readonly NpgsqlDataSource _dataSource;
     private bool _disposed;
 
     private const string TABLE_NAME_PARAM = "table_name";
     private const string TIMESTAMP_PARAM = "timestamp";
 
-    public NpgsqlOperations(string sourceId, NpgsqlDataSource dataSource)
+    public NpgsqlOperations(string providerId, NpgsqlDataSource dataSource)
     {
-        ArgumentException.ThrowIfNullOrEmpty(sourceId, nameof(sourceId));
+        ArgumentException.ThrowIfNullOrEmpty(providerId, nameof(providerId));
         ArgumentNullException.ThrowIfNull(dataSource, nameof(dataSource));
 
-        _sourceId = sourceId;
+        _providerId = providerId;
         _dataSource = dataSource;
     }
 
@@ -29,11 +29,11 @@ public sealed class NpgsqlOperations : ISourceProvider
         ArgumentException.ThrowIfNullOrEmpty(sourceId, nameof(sourceId));
         ArgumentException.ThrowIfNullOrEmpty(connectionString, nameof(connectionString));
 
-        _sourceId = sourceId;
+        _providerId = sourceId;
         _dataSource = new NpgsqlDataSourceBuilder(connectionString).Build();
     }
 
-    public string Id => _sourceId;
+    public string Id => _providerId;
 
     public async ValueTask<bool> EnableTracking(string key, CancellationToken token = default)
     {

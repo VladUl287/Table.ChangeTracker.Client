@@ -66,8 +66,6 @@ public static class SerivceCollectionExtensions
 
     private static IServiceCollection AddTrackerBase(this IServiceCollection services)
     {
-        services.AddSingleton<IProviderIdGenerator, DefaultSourceIdGenerator>();
-
         services.AddSingleton<ITrackerHasher, DefaultTrackerHasher>();
 
         services.AddSingleton<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>, GlobalOptionsBuilder>();
@@ -78,8 +76,6 @@ public static class SerivceCollectionExtensions
         services.AddSingleton<IRequestHandler, DefaultRequestHandler>();
 
         services.AddSingleton<IRequestFilter, DefaultRequestFilter>();
-
-        services.AddSingleton<IStartupFilter, DefaultProvidersValidator>();
 
         return services;
     }

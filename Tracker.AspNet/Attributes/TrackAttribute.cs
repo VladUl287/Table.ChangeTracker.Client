@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Models;
-using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Attributes;
 
@@ -30,14 +29,13 @@ public sealed class TrackAttribute(
             using var scope = scopeFactory.CreateScope();
 
             var serviceProvider = scope.ServiceProvider;
-            var providerSelector = serviceProvider.GetRequiredService<IProviderResolver>();
             var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
 
             _actionOptions = options with
             {
+                Source = sourceId ?? options.Source,
                 Tables = ResolveTables(tables, options),
                 CacheControl = cacheControl ?? options.CacheControl,
-                SourceProvider = providerSelector.SelectProvider(sourceId, options),
             };
 
             return _actionOptions;

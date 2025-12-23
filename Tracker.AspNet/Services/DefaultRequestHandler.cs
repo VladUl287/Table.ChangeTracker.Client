@@ -9,7 +9,7 @@ using Tracker.Core.Services.Contracts;
 namespace Tracker.AspNet.Services;
 
 public sealed class DefaultRequestHandler(
-    IETagProvider etagProvider, ITrackerHasher hasher, ILogger<DefaultRequestHandler> logger) : IRequestHandler
+    IETagProvider etagProvider, IProviderResolver providerResolver, ITrackerHasher hasher, ILogger<DefaultRequestHandler> logger) : IRequestHandler
 {
     public async ValueTask<bool> IsNotModified(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token = default)
     {
@@ -17,32 +17,32 @@ public sealed class DefaultRequestHandler(
         ArgumentNullException.ThrowIfNull(options, nameof(options));
 
         var traceId = new TraceId(ctx);
-
         logger.LogRequestHandleStarted(traceId, ctx.Request.Path);
-        var operationsProvider =
-            options.SourceProvider ??
-            options.SourceProviderFactory?.Invoke(ctx) ??
-            throw new NullReferenceException($"Source operations provider not found. TraceId = {traceId}");
+
+        var operationsProvider = providerResolver.ResolveProvider(ctx, options, out var shouldDispose);
+        logger.LogSourceProviderResolved(traceId, operationsProvider.Id);
         try
         {
-            logger.LogSourceProviderResolved(traceId, operationsProvider.Id);
-
             var lastTimestamp = await GetLastVersionAsync(options, operationsProvider, token);
 
             var notModified = NotModified(ctx, options, traceId, lastTimestamp, out var suffix);
             if (notModified)
+            {
+                logger.LogETagAdded("", traceId);
                 return true;
+            }
 
             var etag = etagProvider.Generate(lastTimestamp, suffix);
             ctx.Response.Headers.CacheControl = options.CacheControl;
             ctx.Response.Headers.ETag = etag;
+
             logger.LogETagAdded(etag, traceId);
             return false;
         }
         finally
         {
-            if (options.SourceProvider is null)
-                operationsProvider?.Dispose();
+            if (shouldDispose)
+                operationsProvider.Dispose();
 
             logger.LogRequestHandleFinished(traceId);
         }
