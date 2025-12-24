@@ -12,9 +12,9 @@ public sealed class GlobalOptions
     public Func<HttpContext, ISourceProvider>? SourceProviderFactory { get; set; }
 
     public Func<HttpContext, bool> Filter { get; set; } = (_) => true;
-    public HashSet<string> InvalidResponseDirectives { get; init; } = ["no-transform", "no-store", "immutable"];
-    public HashSet<string> InvalidRequestDirectives { get; init; } = ["no-transform", "no-store"];
-
+    public HashSet<string> InvalidResponseDirectives { get; init; } = ["no-store", "immutable"];
+    public HashSet<string> InvalidRequestDirectives { get; init; } = ["no-store"];
+        
     public string[] Tables { get; set; } = [];
     public Type[] Entities { get; set; } = [];
 
