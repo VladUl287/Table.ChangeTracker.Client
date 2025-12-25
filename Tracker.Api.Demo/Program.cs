@@ -1,16 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Tracker.Api.Demo.Database;
 using Tracker.AspNet.Extensions;
-using Tracker.AspNet.Services;
-using Tracker.AspNet.Services.Contracts;
 using Tracker.Npgsql.Extensions;
 using Tracker.SqlServer.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddControllers();
-
-    builder.Services.AddSingleton<IProviderResolver, DefaultProviderResolver>();
 
     builder.Services.AddOpenApi();
 
