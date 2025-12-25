@@ -73,12 +73,10 @@ public sealed class DefaultRequestHandler(
         switch (options.Tables.Length)
         {
             case 0:
-                var timestamp = await sourceOperations.GetLastVersion(token);
-                return (ulong)timestamp;
+                return (ulong)await sourceOperations.GetLastVersion(token);
             case 1:
                 var tableName = options.Tables[0];
-                var singleTableTimestamp = await sourceOperations.GetLastVersion(tableName, token);
-                return (ulong)singleTableTimestamp;
+                return (ulong)await sourceOperations.GetLastVersion(tableName, token);
             default:
                 var timestamps = ArrayPool<long>.Shared.Rent(options.Tables.Length);
                 await sourceOperations.GetLastVersions(options.Tables, timestamps, token);
