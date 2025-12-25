@@ -1,8 +1,8 @@
-﻿using Tracker.SqlServer.Models;
-using Tracker.SqlServer.Services;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Core.Services.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Tracker.Core.Services.Contracts;
+using Tracker.SqlServer.Models;
+using Tracker.SqlServer.Services;
 
 namespace Tracker.SqlServer.Extensions;
 

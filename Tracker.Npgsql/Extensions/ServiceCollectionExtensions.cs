@@ -1,9 +1,9 @@
-﻿using Npgsql;
-using Tracker.Npgsql.Services;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Core.Services.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using Tracker.Core.Services.Contracts;
+using Tracker.Npgsql.Services;
 
 namespace Tracker.Npgsql.Extensions;
 

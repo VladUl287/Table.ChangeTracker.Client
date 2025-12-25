@@ -1,10 +1,10 @@
-﻿using System.Buffers;
-using Tracker.AspNet.Models;
-using Tracker.AspNet.Logging;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Tracker.Core.Services.Contracts;
+using System.Buffers;
+using Tracker.AspNet.Logging;
+using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
