@@ -8,7 +8,7 @@ using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Tests.ServicesTests;
 
-public class RequestHandlerTests
+public class DefaultRequestHandlerTests
 {
     private readonly Mock<IETagProvider> _mockETagService;
     private readonly Mock<ITrackerHasher> _mockTimestampsHasher;
@@ -16,7 +16,7 @@ public class RequestHandlerTests
     private readonly Mock<ILogger<DefaultRequestHandler>> _mockLogger;
     private readonly DefaultRequestHandler _handler;
 
-    public RequestHandlerTests()
+    public DefaultRequestHandlerTests()
     {
         _mockETagService = new Mock<IETagProvider>();
         _mockTimestampsHasher = new Mock<ITrackerHasher>();

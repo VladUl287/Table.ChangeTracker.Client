@@ -8,7 +8,7 @@ using Tracker.AspNet.Utils;
 
 namespace Tracker.AspNet.Services;
 
-public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>
+public sealed class DefaultOptionsBuilder(IServiceScopeFactory scopeFactory) : IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>
 {
     private static readonly string _defaultCacheControl = new CacheControlBuilder().WithNoCache().Combine();
 

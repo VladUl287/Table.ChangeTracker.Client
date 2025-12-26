@@ -67,7 +67,7 @@ public static class SerivceCollectionExtensions
     {
         services.AddSingleton<ITrackerHasher, DefaultTrackerHasher>();
 
-        services.AddSingleton<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>, GlobalOptionsBuilder>();
+        services.AddSingleton<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>, DefaultOptionsBuilder>();
 
         services.AddSingleton<IAssemblyTimestampProvider>(new AssemblyTimestampProvider(Assembly.GetExecutingAssembly()));
         services.AddSingleton<IETagProvider, DefaultETagProvider>();
