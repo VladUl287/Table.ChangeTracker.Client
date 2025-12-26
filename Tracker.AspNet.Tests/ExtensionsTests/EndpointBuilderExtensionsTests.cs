@@ -58,11 +58,6 @@ public class EndpointBuilderExtensionsTests
             .Setup(x => x.Build<DbContext>(options))
             .Returns(immutableOptions);
 
-        _mockBuilder
-            .Setup(x => x.AddEndpointFilterFactory(It.IsAny<Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate>>()))
-            .Returns(_mockBuilder.Object)
-            .Verifiable();
-
         // Act
         var result = _mockBuilder.Object.WithTracking<IEndpointConventionBuilder, DbContext>(options);
 
@@ -82,10 +77,6 @@ public class EndpointBuilderExtensionsTests
         _mockOptionsBuilder
             .Setup(x => x.Build<DbContext>(It.Is<GlobalOptions>(o => o.ProviderId == configuredValue)))
             .Returns(immutableOptions);
-
-        _mockBuilder
-            .Setup(x => x.AddEndpointFilterFactory(It.IsAny<Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate>>()))
-            .Returns(_mockBuilder.Object);
 
         // Act
         var result = _mockBuilder.Object.WithTracking<IEndpointConventionBuilder, DbContext>(opt =>
