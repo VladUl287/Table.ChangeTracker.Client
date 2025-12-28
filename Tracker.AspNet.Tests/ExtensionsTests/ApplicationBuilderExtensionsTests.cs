@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -28,14 +29,17 @@ public class ApplicationBuilderExtensionsTests
     public void UseTracker_WithoutParameters_ReturnsBuilderWithMiddleware()
     {
         // Arrange
-        var builder = _mockApplicationBuilder.Object;
+        var builder = _mockApplicationBuilder;
+
+        builder.Setup(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+            .Returns(_mockApplicationBuilder.Object);
 
         // Act
-        var result = Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker(builder);
+        var result = Extensions.ApplicationBuilderExtensions.UseTracker(builder.Object);
 
         // Assert
-        Assert.Same(builder, result);
-        _mockApplicationBuilder.Verify(x => x.UseMiddleware<TrackerMiddleware>(), Times.Once);
+        Assert.Same(builder.Object, result);
+        _mockApplicationBuilder.Verify(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()), Times.Once);
         _mockApplicationBuilder.VerifyNoOtherCalls();
     }
 
@@ -76,20 +80,23 @@ public class ApplicationBuilderExtensionsTests
         var options = new GlobalOptions();
         var immutableOptions = new ImmutableGlobalOptions();
 
+        _mockApplicationBuilder.Setup(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+            .Returns(_mockApplicationBuilder.Object);
+
         var mockOptionsBuilder = new Mock<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
         mockOptionsBuilder.Setup(x => x.Build(options))
             .Returns(immutableOptions);
 
-        _mockServiceProvider.Setup(x => x.GetRequiredService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
+        _mockServiceProvider.Setup(x => x.GetService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
             .Returns(mockOptionsBuilder.Object);
 
         // Act
-        var result = Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker(builder, options);
+        var result = Extensions.ApplicationBuilderExtensions.UseTracker(builder, options);
 
         // Assert
         Assert.Same(builder, result);
         mockOptionsBuilder.Verify(x => x.Build(options), Times.Once);
-        _mockApplicationBuilder.Verify(x => x.UseMiddleware<TrackerMiddleware>(immutableOptions), Times.Once);
+        _mockApplicationBuilder.Verify(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()), Times.Once);
     }
 
     [Fact]
@@ -129,20 +136,23 @@ public class ApplicationBuilderExtensionsTests
         var options = new GlobalOptions();
         var immutableOptions = new ImmutableGlobalOptions();
 
+        _mockApplicationBuilder.Setup(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+            .Returns(_mockApplicationBuilder.Object);
+
         var mockOptionsBuilder = new Mock<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
         mockOptionsBuilder.Setup(x => x.Build<TestDbContext>(options))
             .Returns(immutableOptions);
 
-        _mockServiceProvider.Setup(x => x.GetRequiredService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
+        _mockServiceProvider.Setup(x => x.GetService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
             .Returns(mockOptionsBuilder.Object);
 
         // Act
-        var result = Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker<TestDbContext>(builder, options);
+        var result = Extensions.ApplicationBuilderExtensions.UseTracker<TestDbContext>(builder, options);
 
         // Assert
         Assert.Same(builder, result);
         mockOptionsBuilder.Verify(x => x.Build<TestDbContext>(options), Times.Once);
-        _mockApplicationBuilder.Verify(x => x.UseMiddleware<TrackerMiddleware>(immutableOptions), Times.Once);
+        _mockApplicationBuilder.Verify(x => x.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()), Times.Once);
     }
 
     [Fact]
@@ -167,16 +177,19 @@ public class ApplicationBuilderExtensionsTests
         var configuredProperty = "TestValue";
         var capturedOptions = (GlobalOptions)null;
 
+        _mockApplicationBuilder.Setup(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+            .Returns(_mockApplicationBuilder.Object);
+
         var mockOptionsBuilder = new Mock<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
         mockOptionsBuilder.Setup(x => x.Build<TestDbContext>(It.IsAny<GlobalOptions>()))
             .Callback<GlobalOptions>(opts => capturedOptions = opts)
             .Returns(new ImmutableGlobalOptions());
 
-        _mockServiceProvider.Setup(x => x.GetRequiredService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
+        _mockServiceProvider.Setup(x => x.GetService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
             .Returns(mockOptionsBuilder.Object);
 
         // Act
-        var result = Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker<TestDbContext>(builder, options =>
+        var result = Extensions.ApplicationBuilderExtensions.UseTracker<TestDbContext>(builder, options =>
         {
             options.ProviderId = configuredProperty;
         });
@@ -185,7 +198,7 @@ public class ApplicationBuilderExtensionsTests
         Assert.Same(builder, result);
         Assert.NotNull(capturedOptions);
         Assert.Equal(configuredProperty, capturedOptions.ProviderId);
-        _mockApplicationBuilder.Verify(x => x.UseMiddleware<TrackerMiddleware>(It.IsAny<ImmutableGlobalOptions>()), Times.Once);
+        _mockApplicationBuilder.Verify(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()), Times.Once);
     }
 
     [Fact]
@@ -197,7 +210,7 @@ public class ApplicationBuilderExtensionsTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker(builder, configure));
+            Extensions.ApplicationBuilderExtensions.UseTracker(builder, configure));
 
         Assert.Equal("configure", exception.ParamName);
     }
@@ -210,16 +223,19 @@ public class ApplicationBuilderExtensionsTests
         var configuredProperty = "TestValue";
         var capturedOptions = (GlobalOptions)null;
 
+        _mockApplicationBuilder.Setup(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+           .Returns(_mockApplicationBuilder.Object);
+
         var mockOptionsBuilder = new Mock<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
         mockOptionsBuilder.Setup(x => x.Build(It.IsAny<GlobalOptions>()))
             .Callback<GlobalOptions>(opts => capturedOptions = opts)
             .Returns(new ImmutableGlobalOptions());
 
-        _mockServiceProvider.Setup(x => x.GetRequiredService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
+        _mockServiceProvider.Setup(x => x.GetService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
             .Returns(mockOptionsBuilder.Object);
 
         // Act
-        var result = Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker(builder, options =>
+        var result = Extensions.ApplicationBuilderExtensions.UseTracker(builder, options =>
         {
             options.ProviderId = configuredProperty;
         });
@@ -228,7 +244,7 @@ public class ApplicationBuilderExtensionsTests
         Assert.Same(builder, result);
         Assert.NotNull(capturedOptions);
         Assert.Equal(configuredProperty, capturedOptions.ProviderId);
-        _mockApplicationBuilder.Verify(x => x.UseMiddleware<TrackerMiddleware>(It.IsAny<ImmutableGlobalOptions>()), Times.Once);
+        _mockApplicationBuilder.Verify(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()), Times.Once);
     }
 
     [Fact]
@@ -239,18 +255,21 @@ public class ApplicationBuilderExtensionsTests
         var mockOptionsBuilder = new Mock<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
         var immutableOptions = new ImmutableGlobalOptions();
 
+        _mockApplicationBuilder.Setup(c => c.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+           .Returns(_mockApplicationBuilder.Object);
+
         mockOptionsBuilder.Setup(x => x.Build<TestDbContext>(It.IsAny<GlobalOptions>()))
             .Returns(immutableOptions);
 
-        _mockServiceProvider.SetupSequence(x => x.GetRequiredService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
+        _mockServiceProvider.SetupSequence(x => x.GetService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)))
             .Returns(mockOptionsBuilder.Object);
 
         // Act
-        var result = Tracker.AspNet.Extensions.ApplicationBuilderExtensions.UseTracker<TestDbContext>(builder, options => { });
+        var result = Extensions.ApplicationBuilderExtensions.UseTracker<TestDbContext>(builder, options => { });
 
         // Assert
         Assert.Same(builder, result);
-        _mockServiceProvider.Verify(x => x.GetRequiredService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)), Times.Once);
+        _mockServiceProvider.Verify(x => x.GetService(typeof(IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>)), Times.Once);
     }
 
     private class TestDbContext : DbContext
