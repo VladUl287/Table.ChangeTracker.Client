@@ -191,6 +191,32 @@ public class NpgsqlOperationsIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetLastVersion_InsertToTable_ReturnsCorrectTimestamp()
+    {
+        //Arrange
+        var utcNow = DateTime.UtcNow;
+        await _operations.EnableTracking(_testTableName);
+
+        // Act
+        var timestamp1 = await _operations.GetLastVersion(_testTableName);
+        await SqlHelpers.InsertToTestTable(_connectionString, _testTableName, 12);
+        var timestamp2 = await _operations.GetLastVersion(_testTableName);
+        await SqlHelpers.InsertToTestTable(_connectionString, _testTableName, 12);
+        var timestamp3 = await _operations.GetLastVersion(_testTableName);
+        await Task.Delay(100);
+        var timestamp4 = await _operations.GetLastVersion(_testTableName);
+
+        // Assert
+        Assert.True(utcNow.Ticks < timestamp1);
+        Assert.True(utcNow.Ticks < timestamp2);
+        Assert.True(utcNow.Ticks < timestamp3);
+        Assert.True(utcNow.Ticks < timestamp4);
+        Assert.True(timestamp1 < timestamp2);
+        Assert.True(timestamp2 < timestamp3);
+        Assert.True(timestamp3 == timestamp4);
+    }
+
+    [Fact]
     public async Task GetLastVersion_TrackingNotEnabledTable_ThrowsException()
     {
         // Act

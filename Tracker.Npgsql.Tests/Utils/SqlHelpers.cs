@@ -18,6 +18,21 @@ internal static class SqlHelpers
         await createTableCmd.ExecuteNonQueryAsync();
     }
 
+    internal static async Task InsertToTestTable(string connectionString, string tableName, int value)
+    {
+        using var connection = new NpgsqlConnection(connectionString);
+        await connection.OpenAsync();
+
+        using var createTableCmd = new NpgsqlCommand(
+            $@"
+                INSERT INTO {tableName}(
+	            ""value"")
+	            VALUES ({value});
+            ", connection);
+
+        await createTableCmd.ExecuteNonQueryAsync();
+    }
+
     internal static async Task DropTable(string connectionString, string tableName)
     {
         using var connection = new NpgsqlConnection(connectionString);
