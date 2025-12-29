@@ -14,23 +14,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
         modelBuilder
             .Entity<Role>(builder =>
             {
-                builder.ToTable("roles");
-                builder.HasKey(c => c.Id);
-            });
-    }
-}
-
-public sealed class SqlServerDatabaseContext(DbContextOptions<SqlServerDatabaseContext> options) : DbContext(options)
-{
-    public DbSet<Role> Roles => Set<Role>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-
-        modelBuilder
-            .Entity<Role>(builder =>
-            {
                 builder.HasKey(c => c.Id);
             });
     }

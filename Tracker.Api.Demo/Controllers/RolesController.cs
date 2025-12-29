@@ -8,15 +8,8 @@ namespace Tracker.Api.Demo.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class RolesController(DatabaseContext dbContext, SqlServerDatabaseContext sqlDbContext) : ControllerBase
+public class RolesController(DatabaseContext dbContext) : ControllerBase
 {
-    [HttpGet]
-    [Track<SqlServerDatabaseContext>(["roles"], cacheControl: "max-age=60, stale-while-revalidate=60, stale-if-error=86400")]
-    public ActionResult<IEnumerable<Role>> SqlGetAll()
-    {
-        return sqlDbContext.Roles.ToList();
-    }
-
     [HttpGet]
     [Track(["roles"], cacheControl: "max-age=60, stale-while-revalidate=60, stale-if-error=86400")]
     public ActionResult<IEnumerable<Role>> GetAll()
