@@ -191,6 +191,17 @@ public class NpgsqlOperationsIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetLastVersion_TrackingNotEnabledTable_ThrowsException()
+    {
+        // Act
+        await _operations.DisableTracking(_testTableName);
+        Task timestamp() => _operations.GetLastVersion(_testTableName).AsTask();
+
+        // Assert
+        await Assert.ThrowsAsync<InvalidCastException>(timestamp);
+    }
+
+    [Fact]
     public async Task GetLastVersion_ValidTable_ReturnsTimestamp()
     {
         // Act
@@ -273,6 +284,21 @@ public class NpgsqlOperationsIntegrationTests : IAsyncLifetime
 
         // Assert
         Assert.True(result);
+    }
+
+    [Fact]
+    public async Task SetLastVersion_DisabledTracking_ReturnsFalse()
+    {
+        // Arrange
+        await _operations.DisableTracking(_testTableName);
+
+        var testTimestamp = DateTimeOffset.UtcNow.AddHours(-1).Ticks;
+
+        // Act
+        var result = await _operations.SetLastVersion(_testTableName, testTimestamp);
+
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]
