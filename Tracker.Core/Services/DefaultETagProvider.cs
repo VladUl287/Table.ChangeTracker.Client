@@ -62,7 +62,7 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int CalculateEtagLength(int timestampDigitCount, int suffixLength)
+    internal int CalculateEtagLength(int timestampDigitCount, int suffixLength)
     {
         var separatorCount = suffixLength > 0 ? 2 : 1;
         return _assemblyTimestamp.Length + timestampDigitCount + suffixLength + separatorCount;
