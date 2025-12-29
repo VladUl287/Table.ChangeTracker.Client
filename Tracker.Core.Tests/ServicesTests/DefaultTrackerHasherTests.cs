@@ -213,17 +213,13 @@ public class DefaultTrackerHasherTests
         var hasher = new DefaultTrackerHasher();
         var type = typeof(DefaultTrackerHasher);
 
-        var hashLittleEndianMethod = type.GetMethod("HashLittleEndian",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
         var hashBigEndianMethod = type.GetMethod("HashBigEndian",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
-        var hashLittleEndianMethodFunc = (HashMethodDelegate)hashLittleEndianMethod.CreateDelegate(typeof(HashMethodDelegate));
         var hashBigEndianMethodFunc = (HashMethodDelegate)hashBigEndianMethod.CreateDelegate(typeof(HashMethodDelegate));
 
         // Act
-        var littleEndianHash = hashLittleEndianMethodFunc(timestamps);
+        var littleEndianHash = hasher.Hash(timestamps);
         var bigEndianHash = hashBigEndianMethodFunc(timestamps);
 
         // Assert
