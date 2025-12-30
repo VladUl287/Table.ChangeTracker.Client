@@ -167,7 +167,7 @@ builder.Services
     );
 ```
 
-[default npgsql provider](/Tracker.Npgsql/Services/NpgsqlOperations.cs)
+[default NpgsqlProvider](/Tracker.Npgsql/Services/NpgsqlOperations.cs)
 
 ##### SQL Server (SqlClient)
 
