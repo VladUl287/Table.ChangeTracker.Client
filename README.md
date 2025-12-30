@@ -123,7 +123,7 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
 
 [snippet source](/Tracker.Core/Services/DefaultETagProvider.cs)
 
-#### 5. Usage Examples
+#### 🚀 5. Usage Examples
 
 #### 1. Chanage Tracker Registration
 
