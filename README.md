@@ -6,7 +6,7 @@ Change Tracker is a .NET library for efficient HTTP caching using database chang
 It implements **304 Not Modified** responses by generating ETags based on database timestamps,
 reducing server load while ensuring clients always receive current data.
 
-## Overview
+## 📋 Overview
 
 Change Tracker monitors database changes and generates ETags that combine:
 
@@ -18,18 +18,18 @@ When a client requests data with a cached ETag, the server compares it with the 
 If unchanged, it returns **304 Not Modified** - the client uses its cached copy.
 If changed, fresh data is returned with a new ETag.
 
-## Ideal Use Case
+## 💡 Ideal Use Case
 
 * Read-heavy applications where data changes less frequently than it's read
 * APIs serving semi-static data that changes periodically
 * Applications needing reduced server load without compromising data freshness
 
-## Documentation
+## 📚 Documentation
 
 * [PostgreSQL Docs](/docs/postgres.md) when using [PostgreSQL Npgsql](https://www.npgsql.org)
 * [SQL Server Docs](/docs/sqlserver.md) when using [SQL Server SqlClient](https://github.com/dotnet/SqlClient)
 
-## How It Works
+## 🛠️ How It Works
 
 ETags follow this format:
 
@@ -37,7 +37,7 @@ ETags follow this format:
 {AssemblyWriteTime}-{DbTimeStamp}-{Suffix}
 ```
 
-#### 1. Assembly Write Time
+#### ⏰ 1. Assembly Write Time
 
 The last modification time of your web application's assembly:
 
@@ -70,14 +70,14 @@ services.AddSingleton<IAssemblyTimestampProvider>(
 
 [snippet source](/Tracker.AspNet/Extensions/ServiceCollectionExtensions.cs)
 
-#### 2. Database Timestamp
+#### 🗄️ 2. Database Timestamp
 
 Tracks when data was last modified. Implementation varies by database:
 
 * [SQL Server timestamp calculation](/docs/sqlserver.md#timestamp-calculation)
 * [Postgres timestamp calculation](/docs/postgres.md#timestamp-calculation)
 
-#### 3. Custom Suffix (Optional)
+#### 🎯 3. Custom Suffix (Optional)
 
 Dynamic string based on HTTP context for fine-grained cache control:
 
@@ -106,7 +106,7 @@ var app = builder.Build();
 }
 ```
 
-#### 4. ETag Generation & Comparison
+#### ⚙️ 4. ETag Generation & Comparison
 
 Efficient comparison avoids string allocation when data is unchanged:
 
@@ -263,7 +263,7 @@ app.MapGet("/api/user-profile", () =>
 });
 ```
 
-## Verifying behavior
+## 🧪 Verifying behavior
 
 ### Testing Cache Hits
 
