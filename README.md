@@ -31,17 +31,17 @@ If changed, fresh data is returned with a new ETag.
 
 ## 🛠️ How It Works
 
+### 1. Format
+
 ETags follow this format:
 
 ```cs
 {AssemblyWriteTime}-{DbTimeStamp}-{Suffix}
 ```
 
-#### ⏰ 1. Assembly Write Time
+#### ⏰ Assembly Write Time
 
 The last modification time of your web application's assembly:
-
-**Default implementation:**
 
 ```cs
 public sealed class AssemblyTimestampProvider(Assembly assembly) : IAssemblyTimestampProvider
@@ -60,24 +60,14 @@ public sealed class AssemblyTimestampProvider(Assembly assembly) : IAssemblyTime
 
 [snippet source](/Tracker.Core/Services/AssemblyTimestampProvider.cs)
 
-**Registration:**
-
-```cs
-services.AddSingleton<IAssemblyTimestampProvider>(
-  new AssemblyTimestampProvider(Assembly.GetExecutingAssembly())
-);
-```
-
-[snippet source](/Tracker.AspNet/Extensions/ServiceCollectionExtensions.cs)
-
-#### 🗄️ 2. Database Timestamp
+#### 🗄️ Database Timestamp
 
 Tracks when data was last modified. Implementation varies by database:
 
 * [SQL Server timestamp calculation](/docs/sqlserver.md#timestamp-calculation)
 * [Postgres timestamp calculation](/docs/postgres.md#timestamp-calculation)
 
-#### 🎯 3. Custom Suffix (Optional)
+#### 🎯 Custom Suffix (Optional)
 
 Dynamic string based on HTTP context for fine-grained cache control:
 
@@ -106,7 +96,7 @@ var app = builder.Build();
 }
 ```
 
-#### ⚙️ 4. ETag Generation & Comparison
+#### ⚙️ ETag Generation & Comparison
 
 Efficient comparison avoids string allocation when data is unchanged:
 
@@ -123,19 +113,13 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
 
 [snippet source](/Tracker.Core/Services/DefaultETagProvider.cs)
 
-#### 🚀 5. Usage Examples
+### 🚀 2. Regisration
 
-#### 1. Chanage Tracker Registration
-
-##### Basic Setup
+#### Chanage Tracker Registration
 
 ```cs
 builder.Services.AddTracker();
-```
 
-##### With Global Configuration
-
-```cs
 builder.Services.AddTracker(new GlobalOptions()
 {
     CacheControl = "max-age=60, stale-while-revalidate=60, stale-if-error=86400",
@@ -149,7 +133,7 @@ builder.Services.AddTracker(options =>
 });
 ```
 
-##### Provider Documentation
+#### Provider Documentation
 
 For Change Tracker to function correctly, you must register a database-specific source provider.
 This component monitors database changes and provides timestamps for ETag generation.
@@ -218,9 +202,9 @@ builder.Services
 
 [default ChangeTrackingProvider](/Tracker.SqlServer/Services/SqlServerChangeTrackingOperations.cs) | [default DbIndexUsageStatsProvider](/Tracker.SqlServer/Services/SqlServerIndexUsageOperations.cs)
 
-#### 2. Change Tracker Usage
+### 3. Usage
 
-##### 1. Controller Action (MVC/Web API)
+#### Controller Action (MVC/Web API)
 
 Apply caching to specific endpoints using the [Track] attribute:
 
@@ -233,7 +217,7 @@ public ActionResult<IEnumerable<Role>> GetAll()
 }
 ```
 
-##### 2. Middleware Configuration
+#### Middleware Configuration
 
 Apply caching globally:
 
@@ -247,7 +231,7 @@ app.UseTracker(options =>
 });
 ```
 
-##### 3. Minimal APIs
+#### Minimal APIs
 
 Configure tracking directly on minimal API endpoints:
 
