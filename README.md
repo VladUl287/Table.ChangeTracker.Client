@@ -3,30 +3,26 @@
 Change Tracker is inspired by [Delta Project](https://github.com/SimonCropp/Delta)
 
 Change Tracker is a .NET library for efficient HTTP caching using database change tracking. 
-It implements 304 Not Modified responses by generating ETags based on database timestamps,
+It implements **304 Not Modified** responses by generating ETags based on database timestamps,
 reducing server load while ensuring clients always receive current data.
 
 ## Overview
 
 Change Tracker monitors database changes and generates ETags that combine:
 
-Assembly write time (when your application was built)
-
-Database timestamp (last data modification time)
-
-Custom suffix (optional runtime context)
+* Assembly write time (when your application was built)
+* Database timestamp (last data modification time)
+* Custom suffix (optional runtime context)
 
 When a client requests data with a cached ETag, the server compares it with the current state. 
-If unchanged, it returns 304 Not Modified - the client uses its cached copy. 
+If unchanged, it returns **304 Not Modified** - the client uses its cached copy. 
 If changed, fresh data is returned with a new ETag.
 
 ## Ideal Use Case
 
-Read-heavy applications where data changes less frequently than it's read
-
-APIs serving semi-static data that changes periodically
-
-Applications needing reduced server load without compromising data freshness
+* Read-heavy applications where data changes less frequently than it's read
+* APIs serving semi-static data that changes periodically
+* Applications needing reduced server load without compromising data freshness
 
 ## Documentation
 
@@ -41,7 +37,7 @@ ETags follow this format:
 {AssemblyWriteTime}-{DbTimeStamp}-{Suffix}
 ```
 
-### 1. Assembly Write Time
+#### 1. Assembly Write Time
 The last modification time of your web application's assembly:
 
 <a id='snippet-AssemblyWriteTime'></a>
@@ -67,13 +63,13 @@ public sealed class AssemblyTimestampProvider(Assembly assembly) : IAssemblyTime
 <sup><a href='' title='Snippet source file'>snippet source</a> | 
 <a href='#snippet-AssemblyWriteTime' title='Start of snippet'>anchor</a></sup>
 
-### 2. Database Timestamp
+#### 2. Database Timestamp
 Tracks when data was last modified. Implementation varies by database:
 
 * [SQL Server timestamp calculation](/docs/sqlserver.md#timestamp-calculation)
 * [Postgres timestamp calculation](/docs/postgres.md#timestamp-calculation)
 
-### 3. Custom Suffix (Optional)
+#### 3. Custom Suffix (Optional)
 
 Dynamic string based on HTTP context for fine-grained cache control:
 
@@ -105,7 +101,7 @@ var app = builder.Build();
 ```
 <sup><a href='' title='Snippet source file'>snippet source</a> | <a href='#snippet-Suffix' title='Start of snippet'>anchor</a></sup>
 
-### 4. ETag Generation & Comparison
+#### 4. ETag Generation & Comparison
 
 Efficient comparison avoids string allocation when data is unchanged:
 
@@ -122,6 +118,80 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
 }
 ```
 <sup><a href='' title='Snippet source file'>snippet source</a> | <a href='#snippet-BuildEtag' title='Start of snippet'>anchor</a></sup>
+
+#### 5. Usage Examples
+
+1. Service Registration
+Basic Setup
+
+```cs
+builder.Services.AddTracker();
+```
+
+With Global Configuration
+
+```cs
+builder.Services.AddTracker(new GlobalOptions()
+{
+    CacheControl = "max-age=60, stale-while-revalidate=60, stale-if-error=86400",
+    Filter = (httpContext) => true
+});
+
+builder.Services.AddTracker(options =>
+{
+    options.CacheControl = "max-age=60, stale-while-revalidate=60, stale-if-error=86400";
+    options.Filter = (httpContext) => true;
+});
+```
+
+2. Controller Action (MVC/Web API)
+Apply caching to specific endpoints using the [Track] attribute:
+
+```cs
+[HttpGet]
+[Track(tables: ["roles"], cacheControl: "no-cache")]
+public ActionResult<IEnumerable<Role>> GetAll() 
+{
+    return dbContext.Roles.ToList();
+}
+```
+
+3. Middleware Configuration
+Apply caching globally with request filtering:
+
+```cs
+app.UseTracker(options =>
+{
+    options.CacheControl = "max-age=60, stale-while-revalidate=60, stale-if-error=86400";
+    options.Filter = (httpContext) => 
+        httpContext.Request.Path.Value!.Contains("/api/") &&
+        httpContext.Request.Method == HttpMethods.Get;
+});
+```
+
+4. Minimal APIs
+Configure tracking directly on minimal API endpoints:
+
+```cs
+app.MapGet("/api/roles", () => 
+{
+    // Your endpoint logic
+})
+.WithTracking(options =>
+{
+    options.Tables = ["roles"];
+    options.CacheControl = "max-age=60, stale-while-revalidate=60, stale-if-error=86400";
+});
+
+app.MapGet("/api/user-profile", () => 
+{
+})
+.WithTracking(options =>
+{
+    options.Tables = ["users", "profiles", "preferences"];
+    options.CacheControl = "max-age=300"; // 5 minutes
+});
+```
 
 ## Verifying behavior
 
