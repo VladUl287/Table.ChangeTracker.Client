@@ -219,7 +219,7 @@ public class NpgsqlOperationsIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetLastVersion_DML_MultpleTables_ReturnsCorrectTimestamp()
+    public async Task GetLastVersion_DML_Insert_MultpleTables_ReturnsCorrectTimestamp()
     {
         //Arrange
         var utcNow = await SqlHelpers.GetDatabaseTimestampAsync(_connectionString);
@@ -288,6 +288,58 @@ public class NpgsqlOperationsIntegrationTests : IAsyncLifetime
                 DELETE FROM {_testTableName} ""oi""
                 USING {sourceTable} ""o""
                 WHERE ""oi"".""value"" = ""o"".""value"";
+            ", connection);
+
+        await createTableCmd.ExecuteNonQueryAsync();
+
+        var destTimestamp2 = await _operations.GetLastVersion(_testTableName);
+        var sourceTableTimestamp2 = await _operations.GetLastVersion(sourceTable);
+
+        await SqlHelpers.DropTable(_connectionString, sourceTable);
+
+        // Assert
+        Assert.True(utcNow < destTimestamp1);
+        Assert.True(utcNow < sourceTableTimestamp1);
+
+        Assert.True(utcNow < destTimestamp2);
+        Assert.True(utcNow < sourceTableTimestamp2);
+
+        Assert.True(sourceTableTimestamp1 == sourceTableTimestamp2);
+        Assert.True(destTimestamp1 < destTimestamp2);
+    }
+
+    [Fact]
+    public async Task GetLastVersion_DML_Update_MultpleTables_ReturnsCorrectTimestamp()
+    {
+        //Arrange
+        var utcNow = await SqlHelpers.GetDatabaseTimestampAsync(_connectionString);
+
+        await _operations.EnableTracking(_testTableName);
+
+        var sourceTable = _testTableName + Guid.NewGuid().ToString("N");
+
+        await SqlHelpers.CreateTestTable(_connectionString, sourceTable);
+        await _operations.EnableTracking(sourceTable);
+
+        var changesCount = 10;
+        for (int i = 0; i < changesCount; i++)
+            await SqlHelpers.InsertToTestTable(_connectionString, sourceTable, i);
+
+        await SqlHelpers.InsertToTestFromTestTable(_connectionString, sourceTable, _testTableName);
+
+        // Act
+        var destTimestamp1 = await _operations.GetLastVersion(_testTableName);
+        var sourceTableTimestamp1 = await _operations.GetLastVersion(sourceTable);
+
+        using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var createTableCmd = new NpgsqlCommand(
+            $@"
+                UPDATE {_testTableName} AS r
+                SET ""value"" = r2.""value""
+                FROM {sourceTable} AS r2
+                WHERE r.""id"" = r2.""id"";
             ", connection);
 
         await createTableCmd.ExecuteNonQueryAsync();
