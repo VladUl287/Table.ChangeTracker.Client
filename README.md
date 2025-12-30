@@ -217,11 +217,12 @@ builder.Services
 ```
 
 [default change tracking provider](/Tracker.SqlServer/Services/SqlServerChangeTrackingOperations.cs)
+
 [default db index usage stats provider](/Tracker.SqlServer/Services/SqlServerIndexUsageOperations.cs)
 
-### 2. Change Tracker Usage
+#### 2. Change Tracker Usage
 
-#### 1. Controller Action (MVC/Web API)
+##### 1. Controller Action (MVC/Web API)
 
 Apply caching to specific endpoints using the [Track] attribute:
 
@@ -234,7 +235,7 @@ public ActionResult<IEnumerable<Role>> GetAll()
 }
 ```
 
-#### 2. Middleware Configuration
+##### 2. Middleware Configuration
 
 Apply caching globally:
 
@@ -248,7 +249,8 @@ app.UseTracker(options =>
 });
 ```
 
-1. **Minimal APIs**
+##### 3. Minimal APIs
+
 Configure tracking directly on minimal API endpoints:
 
 ```cs
