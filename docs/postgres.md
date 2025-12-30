@@ -21,7 +21,7 @@ For cases when you need to track **specific tables**, use a custom extension dev
 Global tracking:
 
 ```sql
-select pg_last_committed_xact();
+SELECT pg_last_committed_xact();
 ```
 
 Specific Table Tracking:
