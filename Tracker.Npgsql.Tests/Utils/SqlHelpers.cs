@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Npgsql;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+﻿using Npgsql;
 
 namespace Tracker.Npgsql.Tests.Utils;
 
