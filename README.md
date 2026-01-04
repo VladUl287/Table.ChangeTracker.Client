@@ -1,4 +1,4 @@
-# ChangeTracker 
+# ChangeTracker
 
 [![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.Core.svg?label=ChangeTracker.Core)](https://www.nuget.org/packages/ChangeTracker.Core/)
 [![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.AspNet.svg?label=ChangeTracker.AspNet)](https://www.nuget.org/packages/ChangeTracker.AspNet/)
