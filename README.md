@@ -1,9 +1,9 @@
 # ChangeTracker
 
-[![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.Core.svg?label=Lahey.Tracker.Core)](https://www.nuget.org/packages/Lahey.Tracker.Core/)
-[![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.AspNet.svg?label=Lahey.Tracker.AspNet)](https://www.nuget.org/packages/Lahey.Tracker.AspNet/)
-[![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.Npgsql.svg?label=Lahey.Tracker.Npgsql)](https://www.nuget.org/packages/Lahey.Tracker.Npgsql/)
-[![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.SqlServer.svg?label=Lahey.Tracker.SqlServer)](https://www.nuget.org/packages/Lahey.Tracker.SqlServer/)
+[![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.Core.svg?label=ChangeTracker.Core)](https://www.nuget.org/packages/ChangeTracker.Core/)
+[![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.AspNet.svg?label=ChangeTracker.AspNet)](https://www.nuget.org/packages/ChangeTracker.AspNet/)
+[![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.Npgsql.svg?label=ChangeTracker.Npgsql)](https://www.nuget.org/packages/ChangeTracker.Npgsql/)
+[![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.SqlServer.svg?label=ChangeTracker.SqlServer)](https://www.nuget.org/packages/ChangeTracker.SqlServer/)
 
 ChangeTracker is inspired by [Delta Project](https://github.com/SimonCropp/Delta)
 
