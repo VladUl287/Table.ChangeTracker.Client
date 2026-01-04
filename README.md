@@ -1,11 +1,11 @@
-# Change Tracker Client
+# Lahey Tracker Client
 
 [![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.Core.svg?label=Lahey.Tracker.Core)](https://www.nuget.org/packages/Lahey.Tracker.Core/)
 [![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.AspNet.svg?label=Lahey.Tracker.AspNet)](https://www.nuget.org/packages/Lahey.Tracker.AspNet/)
 [![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.Npgsql.svg?label=Lahey.Tracker.Npgsql)](https://www.nuget.org/packages/Lahey.Tracker.Npgsql/)
 [![NuGet Status](https://img.shields.io/nuget/v/Lahey.Tracker.SqlServer.svg?label=Lahey.Tracker.SqlServer)](https://www.nuget.org/packages/Lahey.Tracker.SqlServer/)
 
-Change Tracker Client is inspired by [Delta Project](https://github.com/SimonCropp/Delta)
+Lahey Tracker Client is inspired by [Delta Project](https://github.com/SimonCropp/Delta)
 
 Change Tracker is a library for efficient HTTP caching using database change tracking.
 It implements [**304 Not Modified**](https://www.keycdn.com/support/304-not-modified) responses
@@ -14,7 +14,7 @@ clients always receive current data.
 
 ## 📋 Overview
 
-Change Tracker Client monitors database changes and generates ETags that combine:
+Lahey Tracker Client monitors database changes and generates ETags that combine:
 
 * Assembly write time (when your application was built)
 * Database timestamp (last data modification time)
@@ -123,7 +123,7 @@ builder.Services.AddTracker(options =>
 
 ### Provider Documentation
 
-For Change Tracker Client to **function correctly**, you must register a database-specific source provider.
+For Lahey Tracker Client to **function correctly**, you must register a database-specific source provider.
 This component monitors database changes and provides timestamps for ETag generation.
 
 Detailed implementation guides for each database:
