@@ -1,9 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<PackageId>Lahey.Tracker.SqlServer</PackageId>
+
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<Version>1.0.0</Version>
+		<PackageVersion>$(Version)</PackageVersion>
+
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/VladUl287/Table.ChangeTracker.Client/tree/main/Tracker.SqlServer</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/VladUl287/Table.ChangeTracker.Client/tree/main/Tracker.SqlServer</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
