@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Core.Tests", "Track
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.AspNet.Tests", "Tracker.AspNet.Tests\Tracker.AspNet.Tests.csproj", "{1E614E74-03D9-46FE-AE79-E8C4E063C2CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.FastEndpoints", "Tracker.FastEndpoints\Tracker.FastEndpoints.csproj", "{11FA8237-309A-42BB-ABAD-A16812780B2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{1E614E74-03D9-46FE-AE79-E8C4E063C2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E614E74-03D9-46FE-AE79-E8C4E063C2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E614E74-03D9-46FE-AE79-E8C4E063C2CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11FA8237-309A-42BB-ABAD-A16812780B2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FA8237-309A-42BB-ABAD-A16812780B2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FA8237-309A-42BB-ABAD-A16812780B2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FA8237-309A-42BB-ABAD-A16812780B2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
