@@ -5,7 +5,7 @@ namespace Tracker.Core.Services;
 
 public sealed class DefaultTableNameResolver : ITableNameResolver
 {
-    public IEnumerable<string> GetTablesNames<TContext>(TContext context, Type[] entities)
+    public IEnumerable<string> GetTablesNames<TContext>(TContext context, IEnumerable<Type> entities)
         where TContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(context, nameof(context));
