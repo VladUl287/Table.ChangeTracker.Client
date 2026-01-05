@@ -37,8 +37,7 @@ public class TrackAttribute(
             var scopeFactory = ctx.RequestServices.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
 
-            var serviceProvider = scope.ServiceProvider;
-            var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
+            var options = scope.ServiceProvider.GetRequiredService<ImmutableGlobalOptions>();
 
             _actionOptions = options with
             {
