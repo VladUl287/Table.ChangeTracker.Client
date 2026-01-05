@@ -11,8 +11,8 @@
 		<PackageVersion>$(Version)</PackageVersion>
 
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/VladUl287/Table.ChangeTracker.Client/tree/main/Tracker.SqlServer</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/VladUl287/Table.ChangeTracker.Client/tree/main/Tracker.SqlServer</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/VladUl287/ChangeTracker.Client</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/VladUl287/ChangeTracker.Client</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>

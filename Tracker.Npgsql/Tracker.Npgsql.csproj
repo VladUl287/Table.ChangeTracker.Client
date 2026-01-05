@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<PackageId>ChangeTracker.Npgsql</PackageId>
-		
+
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -11,8 +11,8 @@
 		<PackageVersion>$(Version)</PackageVersion>
 
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/VladUl287/Table.ChangeTracker.Client/tree/main/Tracker.Npgsql</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/VladUl287/Table.ChangeTracker.Client/tree/main/Tracker.Npgsql</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/VladUl287/ChangeTracker.Client</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/VladUl287/ChangeTracker.Client</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
