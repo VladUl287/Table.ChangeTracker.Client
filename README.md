@@ -4,6 +4,7 @@
 [![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.AspNet.svg?label=ChangeTracker.AspNet)](https://www.nuget.org/packages/ChangeTracker.AspNet/)
 [![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.Npgsql.svg?label=ChangeTracker.Npgsql)](https://www.nuget.org/packages/ChangeTracker.Npgsql/)
 [![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.SqlServer.svg?label=ChangeTracker.SqlServer)](https://www.nuget.org/packages/ChangeTracker.SqlServer/)
+[![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.FastEndpoints.svg?label=ChangeTracker.FastEndpoints)](https://www.nuget.org/packages/ChangeTracker.FastEndpoints/)
 
 ChangeTracker is inspired by [Delta Project](https://github.com/SimonCropp/Delta)
 
