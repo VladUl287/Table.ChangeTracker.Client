@@ -7,19 +7,14 @@ using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Attributes;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class TrackAttribute<TContext>(
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class TrackAttribute<TContext>(
     string[]? tables = null,
     Type[]? entities = null,
     string? providerId = null,
-    string? cacheControl = null) : TrackAttributeBase where TContext : DbContext
+    string? cacheControl = null) : TrackAttribute(tables, providerId, cacheControl) where TContext : DbContext
 {
-    private ImmutableGlobalOptions? _actionOptions;
-#if NET9_0_OR_GREATER
-    private readonly Lock _lock = new();
-#else
-    private readonly object _lock = new();
-#endif
+    public IReadOnlyList<Type>? Entities => entities;
 
     protected internal override ImmutableGlobalOptions GetOptions(ActionExecutingContext ctx)
     {
@@ -40,9 +35,9 @@ public sealed class TrackAttribute<TContext>(
 
             _actionOptions = options with
             {
-                ProviderId = providerId ?? typeof(TContext).FullName ?? options.ProviderId,
-                CacheControl = cacheControl ?? options.CacheControl,
-                Tables = ResolveTables(tables, entities, serviceProvider, tableNameResolver, options),
+                ProviderId = ProviderId ?? typeof(TContext).FullName ?? options.ProviderId,
+                CacheControl = CacheControl ?? options.CacheControl,
+                Tables = ResolveTables(Tables, entities, serviceProvider, tableNameResolver, options),
             };
 
             return _actionOptions;
@@ -50,7 +45,7 @@ public sealed class TrackAttribute<TContext>(
     }
 
     private static ImmutableArray<string> ResolveTables(
-        string[]? tables, Type[]? entities, IServiceProvider services, ITableNameResolver tableNameResolver, ImmutableGlobalOptions options)
+        IReadOnlyList<string>? tables, Type[]? entities, IServiceProvider services, ITableNameResolver tableNameResolver, ImmutableGlobalOptions options)
     {
         var tablesNames = new HashSet<string>(tables ?? []);
 

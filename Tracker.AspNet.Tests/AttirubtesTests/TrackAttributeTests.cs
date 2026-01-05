@@ -81,7 +81,7 @@ public class TrackAttributeTests
 
         // Assert
         Assert.NotNull(attributeUsage);
-        Assert.Equal(AttributeTargets.Method, attributeUsage.ValidOn);
+        Assert.Equal(AttributeTargets.Method | AttributeTargets.Class, attributeUsage.ValidOn);
         Assert.False(attributeUsage.AllowMultiple);
         Assert.False(attributeUsage.Inherited);
     }

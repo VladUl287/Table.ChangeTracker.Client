@@ -7,17 +7,17 @@ using Tracker.AspNet.Models;
 namespace Tracker.AspNet.Attributes;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class TrackAttribute(
+public class TrackAttribute(
     string[]? tables = null,
     string? providerId = null,
     string? cacheControl = null) : TrackAttributeBase
 {
-    private ImmutableGlobalOptions? _actionOptions;
+    protected private ImmutableGlobalOptions? _actionOptions;
 
 #if NET9_0_OR_GREATER
-    private readonly Lock _lock = new();
+    protected private readonly Lock _lock = new();
 #else
-    private readonly object _lock = new();
+    protected private readonly object _lock = new();
 #endif
 
     public IReadOnlyList<string>? Tables => tables;
@@ -42,9 +42,9 @@ public sealed class TrackAttribute(
 
             _actionOptions = options with
             {
-                ProviderId = providerId ?? options.ProviderId,
-                Tables = ResolveTables(tables, options),
-                CacheControl = cacheControl ?? options.CacheControl,
+                ProviderId = ProviderId ?? options.ProviderId,
+                Tables = ResolveTables(Tables, options),
+                CacheControl = CacheControl ?? options.CacheControl,
             };
 
             return _actionOptions;
@@ -52,6 +52,6 @@ public sealed class TrackAttribute(
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ImmutableArray<string> ResolveTables(string[]? tables, ImmutableGlobalOptions options) =>
+    private static ImmutableArray<string> ResolveTables(IReadOnlyList<string>? tables, ImmutableGlobalOptions options) =>
         new HashSet<string>(tables ?? [.. options.Tables]).ToImmutableArray();
 }
