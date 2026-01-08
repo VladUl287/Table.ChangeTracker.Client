@@ -182,7 +182,7 @@ Configure tracking directly with [Fast Endpoints](https://github.com/FastEndpoin
 ```cs
 builder.Services.AddTrackerFastEndpoints();
 
-[Track(tables: ["roles"])] //optional, if not specified options will be fully taked from DI
+[Track(tables: ["roles"])] //attribute usage is optional, if not specified options will be fully taked from DI
 public sealed class MyEndpoint : Endpoint<EmptyRequest>
 {
     public override void Configure()
