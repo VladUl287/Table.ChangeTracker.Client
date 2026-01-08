@@ -1,5 +1,7 @@
 # PostgreSQL usage
 
+[![NuGet Status](https://img.shields.io/nuget/v/ChangeTracker.Npgsql.svg?label=ChangeTracker.Npgsql)](https://www.nuget.org/packages/ChangeTracker.Npgsql/)
+
 Official documentation: [PostgreSQL Npgsql](https://www.npgsql.org).
 
 This implementation uses PostgreSQL's built-in [track_commit_timestamp](https://www.postgresql.org/docs/17/runtime-config-replication.html#GUC-TRACK-COMMIT-TIMESTAMP) setting for global transaction tracking across the database, along with the custom [table_change_tracker](https://github.com/VladUl287/table_change_tracker) extension for monitoring modifications to specific tables.
