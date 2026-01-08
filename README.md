@@ -175,6 +175,32 @@ app.MapGet("/api/user-profile", () =>
 });
 ```
 
+### Fast Endpoints
+
+Configure tracking directly with [Fast Endpoints](https://github.com/FastEndpoints/FastEndpoints):
+
+```cs
+builder.Services.AddTrackerFastEndpoints();
+
+[Track(tables: ["roles"])] //optional, if not specified options will be fully taked from DI
+public sealed class MyEndpoint : Endpoint<EmptyRequest>
+{
+    public override void Configure()
+    {
+        PreProcessor<TrackerPreProcessor<EmptyRequest>>();
+    }
+}
+
+//or global
+app.UseFastEndpoints((config) =>
+{
+    config.Endpoints.Configurator = ep =>
+    {
+        ep.PreProcessor<GlobalTrackerPreProcessor>(Order.Before);
+    };
+});
+```
+
 ## 🧪 Verifying behavior
 
 ### Testing Cache Hits
